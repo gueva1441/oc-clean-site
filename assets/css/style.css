@@ -592,31 +592,37 @@ footer a:hover { color: white; }
 }
 
 
-/* --- CORRECCIONES PARA CELULARES (RESPONSIVE) --- */
+/* --- CORRECCIONES PARA CELULARES (RESPONSIVE) - VERSIÓN FINAL --- */
 @media (max-width: 768px) {
   
-  /* 1. La Portada (Hero) más bajita en celular */
+  /* 1. La Portada (Hero) ajustada */
   #hero {
-    min-height: 60vh; /* Bajamos de 85vh a 60vh para que no sea infinita */
-    padding-top: 110px; /* Ajuste para que no choque con el menú */
+    min-height: 60vh; 
+    padding-top: 110px;
   }
 
-
-  /* 2. Títulos: Ajuste fino para que no se rompan feo */
+  /* 2. Títulos: Volvemos a ponerlos GRANDES (2.8rem) */
   h1 {
-    font-size: 2rem;       /* Un poco más pequeño (aprox 32px) para que quepa mejor */
-    letter-spacing: -1px;  /* Juntamos las letras un poquito para ahorrar espacio */
-    line-height: 1.1;      /* Si se divide en dos, que las líneas queden pegaditas y se vea pro */
-    margin-bottom: 1rem;
+    font-size: 2.8rem;     
+    line-height: 1.1;      
+    margin-bottom: 1.5rem; 
   }
 
-  /* 3. Las benditas fotos de servicios: Más bajitas en cel */
+  /* 3. ESTE ES EL NUEVO: El texto descriptivo más suave */
+  #hero p {
+    font-size: 1.15rem;     
+    font-weight: 500;     
+    padding: 0 15px;      
+    margin-bottom: 2rem;
+  }
+
+  /* 4. Las fotos de servicios controladas */
   .card-img-top {
-    height: 160px; /* En PC es 200px, aquí 160px se ve más elegante */
+    height: 160px; 
   }
   
-  /* 4. Ajuste de padding en las tarjetas */
+  /* 5. Ajuste de padding en las tarjetas */
   #services article {
-    padding: 25px; /* Menos relleno para aprovechar espacio */
+    padding: 25px; 
   }
 }
