@@ -601,9 +601,13 @@ footer a:hover { color: white; }
     padding-top: 110px; /* Ajuste para que no choque con el menú */
   }
 
-  /* 2. Títulos gigantes un poco más chicos */
+
+  /* 2. Títulos: Ajuste fino para que no se rompan feo */
   h1 {
-    font-size: 2.5rem; /* Para que no se rompa en dos líneas feas */
+    font-size: 2rem;       /* Un poco más pequeño (aprox 32px) para que quepa mejor */
+    letter-spacing: -1px;  /* Juntamos las letras un poquito para ahorrar espacio */
+    line-height: 1.1;      /* Si se divide en dos, que las líneas queden pegaditas y se vea pro */
+    margin-bottom: 1rem;
   }
 
   /* 3. Las benditas fotos de servicios: Más bajitas en cel */
