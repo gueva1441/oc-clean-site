@@ -1,6 +1,6 @@
-// main.js - Premium Interactions
+// main.js - Premium Interactions & Logic
 
-// 1. Scroll Reveal with Staggered Effect
+// 1. Scroll Reveal with Staggered Effect (Animación de entrada)
 document.addEventListener("DOMContentLoaded", () => {
   const options = {
     threshold: 0.15, // Espera a que el 15% del elemento sea visible
@@ -23,14 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   animatedElements.forEach((el, index) => {
     el.classList.add("reveal");
-    // Añadimos un pequeño delay basado en el orden para el efecto cascada
-    // pero reseteamos el delay si es un nuevo contenedor
     observer.observe(el);
   });
 });
 
 
-// 2. Form Logic (Manteniendo tu lógica original, pero limpia)
+// 2. Form Logic (Lógica del Formulario + Auto-Scroll)
 (() => {
   const form = document.getElementById("estimateForm");
   if (!form) return;
@@ -46,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (show) {
       element.hidden = false;
       element.style.display = 'block';
-      // Pequeño timeout para permitir transición de opacidad si quisieras agregarla
       setTimeout(() => element.style.opacity = 1, 10);
     } else {
       element.hidden = true;
@@ -57,20 +54,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const updateUI = () => {
     const selected = radios.find(r => r.checked)?.value;
     
-    // 1. Highlight Cards
+    // 1. Highlight Cards (Resaltar tarjeta seleccionada)
     document.querySelectorAll('.choice-card').forEach(card => {
       const input = card.querySelector('input');
       if (input.checked) card.classList.add('is-selected');
       else card.classList.remove('is-selected');
     });
 
-    // 2. Show Fields
+    // 2. Show Fields (Mostrar campos correspondientes)
     if (selected) hiddenCategory.value = selected;
     
     toggleVisibility(commercial, selected === 'commercial');
     toggleVisibility(special, selected === 'special');
     
-    // Mostrar resto del formulario si hay selección
+    // Mostrar resto del formulario (contacto y botón) si hay selección
     const contactSet = form.querySelector('fieldset:last-of-type');
     const actions = form.querySelector('.form-actions');
     
@@ -83,7 +80,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  radios.forEach(r => r.addEventListener('change', updateUI));
+  // --- AQUÍ ESTÁ LA MAGIA DEL AUTO-SCROLL ---
+  radios.forEach(r => r.addEventListener('change', (e) => {
+    // 1. Primero actualizamos la pantalla (mostramos los campos)
+    updateUI();
+
+    // 2. Esperamos un instante a que el navegador pinte los campos nuevos
+    setTimeout(() => {
+        const selectedValue = e.target.value;
+        const targetId = selectedValue === 'commercial' ? 'commercialFields' : 'specialFields';
+        const targetSection = document.getElementById(targetId);
+        
+        // 3. Deslizamos suavemente hacia la sección nueva
+        if (targetSection) {
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 150); // 150ms de pausa para suavidad
+  }));
 
   // Validación básica al enviar
   form.addEventListener('submit', (e) => {
@@ -103,18 +116,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isValid) {
       if(formStatus) formStatus.textContent = "Thank you. Processing your request...";
       formStatus.style.color = "green";
-      // Aquí iría tu integración con n8n más adelante
+      
+      // Simulación de envío (Aquí conectaremos n8n luego)
       setTimeout(() => {
         form.reset();
         updateUI();
         formStatus.textContent = "Request sent! We will be in touch shortly.";
       }, 1500);
+      
     } else {
       if(formStatus) formStatus.textContent = "Please complete all required fields.";
       formStatus.style.color = "red";
     }
   });
 
-  // Init
+  // Inicializar estado (por si el navegador guarda caché del formulario)
   updateUI();
 })();

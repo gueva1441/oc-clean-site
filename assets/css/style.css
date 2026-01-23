@@ -1,4 +1,4 @@
-/* style.css - OC Clean Masters (Versión "Bestia" con Menú Pro) */
+/* style.css - OC Clean Masters (Versión FINAL "Bestia" - Mobile Fixed) */
 
 /* --- 1. VARIABLES & RESET --- */
 :root {
@@ -27,11 +27,10 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-
-
 html { 
   scroll-behavior: smooth; 
-  scroll-padding-top: 180px; /* <--- AGREGA ESTO. Es el "colchón" de seguridad */
+  scroll-padding-top: 180px; /* Colchón para que el menú no tape títulos */
+  overflow-x: hidden; /* Evita el bailoteo horizontal */
 }
 
 body {
@@ -41,6 +40,9 @@ body {
   color: var(--text-main);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
 }
 
 /* --- 2. TIPOGRAFÍA & GLOBALES --- */
@@ -77,7 +79,7 @@ a { color: inherit; text-decoration: none; transition: 0.2s; }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 
 
-/* --- 3. HEADER "BESTIA" (Menú Pro + Botón Fantasma) --- */
+/* --- 3. HEADER "BESTIA" (Menú Pro) --- */
 header {
   position: sticky;
   top: 0;
@@ -105,84 +107,77 @@ nav .logo img {
 
 nav ul {
   display: flex;
-  gap: 40px;
+  gap: 50px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-@media (max-width: 900px) {
-  nav ul { display: none; }
-}
-
-/* Enlaces "BESTIA" (Mayúsculas + Hover Láser) */
+/* Estilos de enlaces del menú */
 nav ul a {
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--text-main);
-  text-transform: uppercase; /* MAYÚSCULAS */
-  letter-spacing: 0.05em;    /* Un poco de aire */
-  position: relative;        /* Para el efecto láser */
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
   padding-bottom: 4px;
 }
 
-/* El Rayo Láser Azul */
-nav ul a::after {
+/* Línea Naranja debajo del menú (Desktop) */
+nav ul li a::after {
   content: "";
   position: absolute;
   width: 0%;
   height: 2px;
   bottom: 0;
   left: 0;
-  background-color: var(--primary);
+  background-color: #ff6600; /* Naranja */
   transition: width 0.3s ease-in-out;
 }
 
-nav ul a:hover { color: var(--primary); }
 nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
+nav ul a.active::after { width: 100%; }
 
-
-/* Botón "Fantasma" del Menú (Se oculta al inicio) */
-.nav-cta {
-  background: var(--text-main);
-  color: white;
-  padding: 12px 24px;
+/* Botón "Request Quote" DENTRO del menú (Estilo Azul Pro) */
+nav ul a[href="#estimate"] {
+  color: var(--primary) !important;
+  border: 2px solid var(--primary);
+  padding: 8px 24px;
   border-radius: 50px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  opacity: 0;            /* Invisible por defecto */
-  pointer-events: none;  /* No se puede clickear si no se ve */
-  transform: translateY(-10px);
-  transition: all 0.4s ease;
+  transition: all 0.3s ease;
 }
-.nav-cta:hover { background: var(--primary); }
+nav ul a[href="#estimate"]::after { display: none; } /* Sin línea naranja abajo */
 
-/* Clase que JS agregará para mostrar el botón */
-.nav-cta.show-me {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
+nav ul a[href="#estimate"]:hover {
+  background: var(--primary);
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
+/* Botón "Request Quote" AFUERA del menú (El fantasma) */
+/* Por defecto lo ocultamos en Desktop para no tener duplicados */
+nav > a[href="#estimate"]:not(.logo) {
+  display: none; 
+}
 
-/* --- 4. MARQUEE --- */
+@media (max-width: 900px) {
+  nav ul { display: none; } /* Ocultar menú lista en tablet/móvil */
+}
 
+
+/* --- 4. MARQUEE (Cinta de Texto) --- */
 .marquee {
   width: 100%;
   z-index: 500;
   background: #ffffff;
-  
-  /* --- AGREGA ESTOS BORDES --- */
-  border-top: 1px solid #cbd5e1;    /* Línea gris arriba */
-  border-bottom: 1px solid #cbd5e1; /* Línea gris abajo */
-  /* --------------------------- */
-  
-  padding: 10px 0; /* Un poquito más de aire */
+  border-top: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 10px 0;
   overflow: hidden;
   position: relative;
   margin: 0;
 }
-
 
 .marquee__track {
   display: flex;
@@ -217,7 +212,6 @@ nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
   background: linear-gradient(to bottom, #fff 0%, #f8fafc 100%);
 }
 
-/* Foto de fondo Hero - AJUSTADA */
 #hero::before {
   content: "";
   position: absolute;
@@ -225,10 +219,7 @@ nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
   background-image: url('../img/hero/hero.jpg'); 
   background-size: cover;
   background-position: center;
-  /* CAMBIO: Opacidad subida a 0.75 para que se vea nítida la oficina */
   opacity: 0.75; 
-  filter: none; 
-  z-index: 0;
   pointer-events: none;
 }
 
@@ -254,7 +245,7 @@ nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
   margin-top: 40px;
 }
 
-#hero div { /* Botones */
+#hero div {
   display: flex; gap: 20px; justify-content: center; margin-bottom: 60px;
 }
 
@@ -271,21 +262,14 @@ nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
 }
 #hero div a:first-child:hover { transform: translateY(-3px); box-shadow: 0 20px 30px -5px rgba(37, 99, 235, 0.5); }
 
-
-/* Botón Secundario (View Services) - VERSIÓN MEJORADA */
 #hero div a:last-child {
-  background: rgba(255, 255, 255, 0.9); /* Blanco casi sólido */
-  border: 2px solid #0f172a; /* Borde OSCURO para que se vea la caja */
-  color: #0f172a; /* Texto oscuro */
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #0f172a;
+  color: #0f172a;
 }
-
-/* Al pasar el mouse, se invierte para efecto visual */
 #hero div a:last-child:hover {
-  background: #0f172a; /* Fondo oscuro */
-  color: white; /* Texto blanco */
-  border-color: #0f172a;
+  background: #0f172a; color: white; border-color: #0f172a;
 }
-
 
 
 /* --- 6. SERVICES --- */
@@ -296,13 +280,6 @@ nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
   overflow: hidden;
 }
 
-/* Mosaico de fondo Services - Invisible por petición anterior */
-#services::before {
-  content: "";
-  display: none; /* OCULTO */
-}
-
-/* Tarjetas: Efecto Vidrio Esmerilado */
 #services article {
   padding: 40px;
   border-radius: 24px;
@@ -322,8 +299,6 @@ nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
   box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
 }
 
-#services > * { position: relative; z-index: 1; }
-
 @media (min-width: 768px) {
     #services {
         display: grid;
@@ -338,55 +313,43 @@ nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
 }
 
 .service-title {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
+  display: flex; align-items: center; gap: 16px; margin-bottom: 20px; font-size: 1.5rem;
 }
-
-.icon {
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
-  fill: var(--primary);
-}
-
-/* Control estricto para las fotos de las tarjetas */
+.icon { width: 48px; height: 48px; flex-shrink: 0; fill: var(--primary); }
 .card-img-top {
-    width: 100%;            
-    height: 200px;          
-    object-fit: cover;      
-    border-radius: 12px;    
-    margin-bottom: 1.5rem;  
-    display: block;
+    width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; display: block;
+}
+
+/* Nota pequeña al pie de servicios */
+#services > p:last-child {
+  background: rgba(255, 255, 255, 0.9); 
+  padding: 10px 20px;
+  border-radius: 50px; 
+  display: inline-block; 
+  font-weight: 600;
+  font-size: 0.95rem !important; 
+  color: var(--text-main);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-top: 40px;
 }
 
 
-/* --- 7. WHY OC CLEAN (GRID LAYOUT) --- */
-
-
+/* --- 7. WHY OC CLEAN --- */
 #why {
   position: relative;
   background: #0f172a;
   color: white;
   overflow: hidden;
   border-radius: 32px;
-
-  /* --- CAMBIO DE TAMAÑO (Para que se vea "Perrón") --- */
-  max-width: 1300px;  /* Mismo tope que Services */
-  width: 90%;         /* Deja margenes a los lados en pantallas chicas */
-  margin: 60px auto;  /* Se centra automáticamente */
+  max-width: 1300px;
+  width: 90%;
+  margin: 60px auto;
   padding: 80px 40px;
-
-  /* --- MODO GRILLA (Columnas) --- */
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 40px;
   text-align: left;
 }
-
-
 
 #why::before {
   content: "";
@@ -401,483 +364,179 @@ nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
 }
 
 #why > * { position: relative; z-index: 1; }
-
-/* El título ocupa todo el ancho de arriba */
-#why h2 { 
-  grid-column: 1 / -1; 
-  text-align: center; 
-  margin-bottom: 60px;
-  color: white;
-}
-
+#why h2 { grid-column: 1 / -1; text-align: center; margin-bottom: 60px; color: white; }
 #why article h3 { color: white; margin-bottom: 12px; font-size: 1.25rem; }
 #why article p { color: #cbd5e1; font-size: 1rem; margin: 0; }
 
 
-/* --- 8. HOW IT WORKS (HORIZONTAL STEPS) --- */
-#how {
-  padding: 100px 24px;
-  max-width: 1300px;
-  margin: 0 auto;
-}
-
+/* --- 8. HOW IT WORKS --- */
+#how { padding: 100px 24px; max-width: 1300px; margin: 0 auto; }
 #how h2 { margin-bottom: 60px; }
-
 #how ol {
-  display: grid; /* También lo hacemos grilla */
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 4 Pasos en fila */
-  gap: 30px;
-  list-style: none; /* Quitamos los números feos por defecto */
-  padding: 0;
-  margin: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;
+  list-style: none; padding: 0; margin: 0;
 }
-
 #how li {
-  background: #f8fafc; /* Fondo gris muy suave para cada paso */
-  padding: 30px;
-  border-radius: 20px;
-  text-align: left;
-  border: 1px solid var(--border);
-  transition: 0.3s;
+  background: #f8fafc; padding: 30px; border-radius: 20px; text-align: left;
+  border: 1px solid var(--border); transition: 0.3s;
 }
+#how li:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: var(--shadow-card); }
+#how li strong { display: block; color: var(--primary); font-size: 1.2rem; margin-bottom: 12px; }
 
-#how li:hover {
-  transform: translateY(-5px);
-  border-color: var(--primary);
-  box-shadow: var(--shadow-card);
-}
-
-/* Le ponemos negrita al título de cada paso para que resalte */
-#how li strong {
-  display: block;
-  color: var(--primary);
-  font-size: 1.2rem;
-  margin-bottom: 12px;
+/* Frase "Preferred contact method" corregida */
+#how > p:last-child {
+  background: #eff6ff; color: var(--primary); font-weight: 700;
+  display: inline-block; padding: 8px 20px; border-radius: 50px;
+  margin-top: 30px; font-size: 0.9rem;
 }
 
 
-
-
-
-
-
-
-
-/* --- 9. ESTIMATE FORM --- */
-#estimate {
-  padding: 120px 24px;
-  background: var(--bg-alt);
+/* --- 9. VIDEOS (Galería Pro) --- */
+#videos div[aria-label="Video placeholders"] {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;
 }
+#videos article {
+  background: #f1f5f9; border-radius: 20px; overflow: hidden; border: 1px solid #e2e8f0;
+  transition: all 0.3s ease; position: relative;
+  display: flex; flex-direction: column; justify-content: flex-end; height: 250px; padding: 20px;
+}
+#videos article::before {
+  content: "▶"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 60px; height: 60px; background: white; color: var(--primary); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 24px; padding-left: 5px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s;
+}
+#videos article:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border-color: var(--primary); }
+#videos article:hover::before { background: var(--primary); color: white; transform: translate(-50%, -50%) scale(1.1); }
+#videos h3 { font-size: 1.1rem; margin-bottom: 5px; z-index: 2; color: #0f172a; }
+#videos p { font-size: 0.9rem; margin: 0; z-index: 2; opacity: 0.8; }
 
+
+/* --- 10. ESTIMATE FORM (Modernizado) --- */
+#estimate { padding: 120px 24px; background: var(--bg-alt); }
 #estimateForm {
-  background: white;
-  padding: 48px;
-  border-radius: 32px;
-  box-shadow: var(--shadow-card);
-  max-width: 900px;
-  margin: 60px auto 0;
-  text-align: left; 
+  background: white; padding: 48px; border-radius: 32px; box-shadow: var(--shadow-card);
+  max-width: 900px; margin: 60px auto 0; text-align: left; 
 }
 
-.choice-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
+#estimateForm fieldset { border: none !important; padding: 0 !important; margin: 0 0 40px 0 !important; }
+#estimateForm legend {
+  font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 24px;
+  width: 100%; border-bottom: 2px solid var(--bg-alt); padding-bottom: 10px;
 }
 
+.choice-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
 .choice-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 24px;
-  border: 2px solid var(--border);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: 0.2s;
-  background: white;
+  position: relative; display: flex; flex-direction: column; gap: 8px; padding: 24px;
+  border: 2px solid var(--border); border-radius: 20px; cursor: pointer; transition: 0.2s; background: white;
 }
-
+.choice-card:hover { border-color: #cbd5e1; }
+.choice-card.is-selected {
+  border-color: var(--primary); background: #eff6ff; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
 .choice-card input { position: absolute; opacity: 0; height: 0; width: 0; }
 .choice-card-title { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
 .choice-card-sub { font-size: 0.95rem; color: var(--text-muted); line-height: 1.4; }
 
-.choice-card:hover { border-color: #cbd5e1; }
-.choice-card.is-selected {
-  border-color: var(--primary);
-  background: #eff6ff;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+/* Iconos del Formulario */
+.card-icon-wrapper {
+  width: 60px; height: 60px; background: #eff6ff; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 15px; transition: 0.3s ease;
 }
-.choice-card.is-selected .choice-card-title { color: var(--primary); }
+.card-icon-wrapper .icon { width: 32px; height: 32px; fill: var(--primary); }
+.choice-card:hover .card-icon-wrapper { background: var(--primary); transform: scale(1.1); }
+.choice-card:hover .card-icon-wrapper .icon { fill: white; }
+.choice-card.is-selected .card-icon-wrapper { background: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+.choice-card.is-selected .card-icon-wrapper .icon { fill: white; }
 
 .form-grid { display: grid; gap: 24px; }
-@media (min-width: 600px) { 
-  .form-grid { grid-template-columns: 1fr 1fr; }
-  .form-field--full { grid-column: 1 / -1; }
-}
+@media (min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr; } .form-field--full { grid-column: 1 / -1; } }
 
-label {
-  display: block;
-  font-weight: 700;
-  font-size: 0.9rem;
-  margin-bottom: 8px;
-  color: var(--text-main);
-}
-
+label { display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; color: var(--text-main); }
 input:not([type="radio"]), select, textarea {
-  width: 100%;
-  padding: 14px 18px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  font-size: 1rem;
-  background: #f8fafc;
-  font-family: inherit;
-  transition: 0.2s;
+  width: 100%; padding: 16px !important; border: 1px solid var(--border); border-radius: 12px;
+  font-size: 1.05rem; background: #f8fafc; font-family: inherit; transition: 0.2s;
 }
-
 input:focus, select:focus, textarea:focus {
-  outline: none;
-  background: white;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  outline: none; background: white; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
 button[type="submit"] {
-  width: 100%;
-  padding: 20px;
-  margin-top: 32px;
-  background: var(--text-main);
-  color: white;
-  border: none;
-  border-radius: 16px;
-  font-size: 1.2rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
+  width: 100%; padding: 20px; margin-top: 32px;
+  background: var(--primary) !important; color: white; border: none; border-radius: 16px;
+  font-size: 1.3rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+  box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.5);
 }
 button[type="submit"]:hover {
-  background: var(--primary);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+  background: var(--primary-dark) !important; transform: translateY(-3px); box-shadow: 0 20px 40px -5px rgba(37, 99, 235, 0.6);
 }
-
-.form-microcopy { font-size: 0.9rem; text-align: center; margin-top: 16px; }
 #formStatus { text-align: center; font-weight: 700; margin-top: 10px; }
 
 
-/* --- 10. FOOTER --- */
-footer {
-  background: #0f172a;
-  color: white;
-  padding: 80px 24px;
-}
+/* --- 11. FOOTER --- */
+footer { background: #0f172a; color: white; padding: 80px 24px; }
 footer p { color: #94a3b8; font-size: 1rem; }
 footer a { color: #cbd5e1; font-weight: 500; text-decoration: underline; }
 footer a:hover { color: white; }
 
 
-/* Arreglo de legibilidad para el texto pequeño de Services */
-#services > p:last-child {
-  background: rgba(255, 255, 255, 0.9); 
-  padding: 10px 20px;
-  border-radius: 50px; 
-  display: inline-block; 
-  font-weight: 600;
-  font-size: 0.95rem !important; 
-  color: var(--text-main);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  margin-top: 40px;
-}
-
-/* Control para las fotos dentro de las tarjetas de servicios (Legacy fix) */
-#services article img {
-    width: 100%;           
-    height: 220px;         
-    object-fit: cover;     
-    border-radius: 12px;   
-    margin-bottom: 1.5rem; 
-    display: block;        
-}
-
-
-/* --- CORRECCIONES PARA CELULARES (RESPONSIVE) - VERSIÓN FINAL CON ARREGLO DE BOTÓN --- */
+/* =========================================
+   === ZONA MÓVIL (LA MAGIA FINAL) ===
+   ========================================= */
 @media (max-width: 768px) {
   
-  /* 1. La Portada (Hero) ajustada */
-  #hero {
-    min-height: 60vh; 
-    padding-top: 110px;
-  }
-
-  /* 2. Títulos: Volvemos a ponerlos GRANDES (2.8rem) */
-  h1 {
-    font-size: 2.8rem;     
-    line-height: 1.1;      
-    margin-bottom: 1.5rem; 
-  }
-
-  /* 3. El texto descriptivo más suave */
-  #hero p {
-    font-size: 1.15rem;     
-    font-weight: 500;     
-    padding: 0 15px;      
-    margin-bottom: 2rem;
+  /* 1. Header: LOGO y BOTÓN en la misma línea */
+  header nav {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 10px 15px !important;
+    gap: 10px;
   }
   
-  /* 4. ARREGLO DEL BOTÓN AZUL PARTIDO EN CELULAR */
-  #hero div a:first-child {
-    padding: 18px 20px; /* Reducimos padding lateral */
-    font-size: 1rem;    /* Texto un poco más chico */
-    white-space: nowrap; /* FUERZA 1 SOLA LÍNEA */
-    width: 100%; /* Que ocupe todo el ancho disponible */
-    text-align: center;
-  }
-  
-  #hero div {
-    flex-direction: column; /* Botones en columna vertical */
-    gap: 15px;
-    width: 100%;
-    padding: 0 20px;
-  }
-  
-  #hero div a:last-child {
-      width: 100%;
-      text-align: center;
+  .logo img {
+    height: 35px !important; /* Logo más pequeño */
+    width: auto;
   }
 
-  /* 5. Las fotos de servicios controladas */
-  .card-img-top {
-    height: 160px; 
-  }
-  
-  /* 6. Ajuste de padding en las tarjetas */
-  #services article {
-    padding: 25px; 
-  }
-}
-
-
-/* --- 1. ELIMINACIÓN TOTAL DEL BOTÓN DERECHO --- */
-/* Esto busca específicamente el enlace de "Request a Quote" fuera de la lista y lo oculta */
-nav > a[href="#estimate"] {
-    display: none !important;
-}
-
-/* --- 2. MENÚ MÁS GRANDE Y POTENTE --- */
-/* Hacemos las letras más grandes y gruesas para que llenen el espacio */
-nav ul a {
-    font-size: 1.05rem !important; /* Aumentamos tamaño (antes era 0.9rem) */
-    font-weight: 900 !important;   /* Ultra Negrita (Black) para máxima presencia */
-    letter-spacing: 0.5px;         /* Un poquito de aire para elegancia */
-    color: #0f172a !important;     /* Color oscuro intenso */
-}
-
-/* Ajuste del espacio entre palabras del menú */
-nav ul {
-    gap: 50px !important; /* Separamos más los elementos (antes 40px) */
-}
-
-
-
-
-
-
-
-/* --- 1. MATAR AL INTRUSO (El botón duplicado de afuera) --- */
-nav > a[href="#estimate"]:not(.logo) {
-    display: none !important;
-}
-
-/* --- 2. MAQUILLAR EL TEXTO DE ADENTRO (Para que destaque) --- */
-/* Buscamos el enlace específico dentro del menú que lleva al estimado */
-nav ul a[href="#estimate"] {
-    color: var(--primary) !important; /* Lo ponemos AZUL (tu color principal) */
-    border: 2px solid var(--primary); /* Le ponemos un marco azul */
-    padding: 8px 24px;      /* Le damos aire a los lados */
-    border-radius: 50px;    /* Bordes redondos */
-    transition: all 0.3s ease;
-}
-
-/* Cuando le pasas el mouse, se llena de azul */
-nav ul a[href="#estimate"]:hover {
-    background: var(--primary);
+  /* RESUCITAMOS el botón exterior para el celular y lo estilizamos */
+  nav > a[href="#estimate"]:not(.logo) {
+    display: inline-block !important; /* ¡APARECE! */
+    font-size: 0.8rem !important;
+    padding: 8px 14px !important;
+    background: var(--primary) !important;
     color: white !important;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); /* Un brillito azul */
-}
-
-
-
-
-/* --- AMOR PARA LA SECCIÓN DE VIDEOS (Galería Pro) --- */
-
-/* 1. Convertimos el contenedor en una Grilla de 3 columnas */
-#videos div[aria-label="Video placeholders"] {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-top: 40px;
-}
-
-/* 2. Convertimos cada texto en una "Tarjeta de Video" */
-#videos article {
-  background: #f1f5f9; /* Gris claro de fondo */
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
-  position: relative;
+    border-radius: 50px;
+    border: none !important;
+    white-space: nowrap;
+    height: auto;
+  }
   
-  /* Esto crea el aspecto de video (altura fija) */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end; /* Texto abajo */
-  height: 250px; /* Altura de video */
-  padding: 20px;
-}
+  /* Ocultamos la lista (por si acaso) */
+  nav ul { display: none; }
 
-/* 3. Creamos un botón de "Play" falso en el centro con CSS puro */
-#videos article::before {
-  content: "▶"; /* Triángulo de Play */
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%); /* Centrado perfecto */
+
+  /* 2. Marquesina Flaca */
+  .marquee { padding: 4px 0 !important; }
+  .marquee .mq-text { font-size: 0.75rem !important; font-weight: 600; }
+
+
+  /* 3. Hero: Ajustes de texto y botones */
+  #hero { min-height: 60vh; padding-top: 110px; }
+  h1 { font-size: 2.5rem; line-height: 1.1; margin-bottom: 1.5rem; }
+  #hero p { font-size: 1.15rem; padding: 0 10px; }
   
-  width: 60px; height: 60px;
-  background: white;
-  color: var(--primary);
-  border-radius: 50%; /* Círculo */
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px;
-  padding-left: 5px; /* Ajuste visual */
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  transition: 0.3s;
-}
-
-/* 4. Efecto Hover (Al pasar el mouse) */
-#videos article:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  border-color: var(--primary);
-}
-#videos article:hover::before {
-  background: var(--primary);
-  color: white;
-  transform: translate(-50%, -50%) scale(1.1); /* Crece un poquito */
-}
-
-/* 5. Estilo de los textos dentro de la tarjeta */
-#videos h3 {
-  font-size: 1.1rem;
-  margin-bottom: 5px;
-  z-index: 2;
-  color: #0f172a;
-}
-#videos p {
-  font-size: 0.9rem;
-  margin: 0;
-  z-index: 2;
-  opacity: 0.8;
-}
-
-/* --- DETALLE EXTRA: Arreglar la frase huérfana de "Preferred contact method" --- */
-#how > p:last-child {
-  background: #eff6ff; /* Azul muy clarito */
-  color: var(--primary);
-  font-weight: 700;
-  display: inline-block;
-  padding: 8px 20px;
-  border-radius: 50px;
-  margin-top: 30px;
-  font-size: 0.9rem;
-}
+  #hero div { flex-direction: column; width: 100%; padding: 0 20px; gap: 15px; }
+  #hero div a { width: 100%; text-align: center; font-size: 1rem; padding: 16px; }
 
 
-
-/* --- AMOR PARA LAS TARJETAS DEL FORMULARIO (Iconos Pro) --- */
-
-/* 1. Contenedor del icono (Círculo suave de fondo) */
-.card-icon-wrapper {
-  width: 60px;
-  height: 60px;
-  background: #eff6ff; /* Azul muy clarito */
-  border-radius: 50%; /* Círculo */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 15px; /* Separación del título */
-  transition: 0.3s ease;
-}
-
-/* 2. El icono en sí (El dibujo SVG) */
-.card-icon-wrapper .icon {
-  width: 32px;
-  height: 32px;
-  fill: var(--primary); /* Azul corporativo */
-}
-
-/* 3. Efecto al pasar el mouse (La tarjeta se activa) */
-.choice-card:hover .card-icon-wrapper {
-  background: var(--primary); /* El círculo se vuelve azul fuerte */
-  transform: scale(1.1); /* Crece un poquito */
-}
-
-.choice-card:hover .card-icon-wrapper .icon {
-  fill: white; /* El icono se vuelve blanco para contrastar */
-}
-
-/* 4. Cuando está seleccionado (Clickeado) */
-.choice-card.is-selected .card-icon-wrapper {
-  background: var(--primary);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-.choice-card.is-selected .card-icon-wrapper .icon {
-  fill: white;
-}
-
-
-
-/* --- AMOR PARA EL FORMULARIO (MODERNIZACIÓN FINAL) --- */
-
-/* 1. Quitar los bordes viejos de las secciones (Fieldsets) */
-#estimateForm fieldset {
-  border: none !important; /* Adiós borde gris feo */
-  padding: 0 !important;
-  margin: 0 0 40px 0 !important;
-}
-
-/* 2. Poner los títulos de sección más guapos */
-#estimateForm legend {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 24px;
-  padding: 0;
-  width: 100%;
-  border-bottom: 2px solid var(--bg-alt); /* Una línea sutil solo abajo del título */
-  padding-bottom: 10px;
-}
-
-/* 3. El Botón de Enviar: DE NEGRO A AZUL VIBRANTE */
-button[type="submit"] {
-  background: var(--primary) !important; /* Azul Corporativo */
-  box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.5); /* Sombra azul brillante */
-  font-size: 1.3rem; /* Un pelín más grande */
-  transition: all 0.3s ease;
-}
-
-/* Efecto al pasar el mouse por el botón */
-button[type="submit"]:hover {
-  background: var(--primary-dark) !important;
-  transform: translateY(-3px);
-  box-shadow: 0 20px 40px -5px rgba(37, 99, 235, 0.6);
-}
-
-/* 4. Inputs más "gorditos" y modernos */
-input, select, textarea {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 16px !important; /* Más espacio interno */
-  font-size: 1.05rem;
-  border-radius: 12px;
+  /* 4. Formulario Compacto (Zoom Out) */
+  #estimateForm { padding: 24px; }
+  .choice-card { padding: 15px !important; }
+  .card-icon-wrapper { width: 45px !important; height: 45px !important; margin-bottom: 10px !important; }
+  .choice-card-title { font-size: 1rem !important; }
+  
+  /* 5. Servicios (Imágenes más bajas) */
+  .card-img-top { height: 160px; }
+  #services article { padding: 25px; }
 }
