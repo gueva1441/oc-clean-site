@@ -540,3 +540,34 @@ footer a:hover { color: white; }
   .card-img-top { height: 160px; }
   #services article { padding: 25px; }
 }
+
+
+/* --- CORRECCIÓN DE ATERRIZAJE (SCROLL PERFECTO) --- */
+
+/* Esto crea un "colchón invisible" encima de cada sección */
+/* Así el menú nunca tapa el título al llegar */
+
+#services, 
+#why, 
+#how, 
+#videos, 
+#estimate {
+    /* EN COMPUTADORA: Dejamos 150px de aire arriba */
+    scroll-margin-top: 150px; 
+}
+
+/* EN CELULAR: Ajuste milimétrico */
+@media (max-width: 768px) {
+    #services, 
+    #why, 
+    #how, 
+    #videos, 
+    #estimate {
+        /* Dejamos 80px (lo que mide el header + un poquito de aire) */
+        scroll-margin-top: 80px; 
+    }
+}
+
+
+
+
