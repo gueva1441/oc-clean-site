@@ -101,16 +101,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (isValid) {
-      if(formStatus) formStatus.textContent = "Gracias. Procesando tu solicitud...";
+      if(formStatus) formStatus.textContent = "Thank you. Processing your request...";
       formStatus.style.color = "green";
       // Aquí iría tu integración con n8n más adelante
       setTimeout(() => {
         form.reset();
         updateUI();
-        formStatus.textContent = "¡Solicitud enviada! Nos pondremos en contacto pronto.";
+        formStatus.textContent = "Request sent! We will be in touch shortly.";
       }, 1500);
     } else {
-      if(formStatus) formStatus.textContent = "Por favor completa los campos requeridos.";
+      if(formStatus) formStatus.textContent = "Please complete all required fields.";
       formStatus.style.color = "red";
     }
   });

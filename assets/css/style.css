@@ -1,17 +1,17 @@
-/* style.css - OC Clean Masters (Consolidated V3.0) */
+/* style.css - OC Clean Masters (Versión "Bestia" con Menú Pro) */
 
 /* --- 1. VARIABLES & RESET --- */
 :root {
   /* Paleta Corporativa */
   --bg: #ffffff;
-  --bg-alt: #f1f5f9; /* Gris azulado tenue */
-  --text-main: #0f172a; /* Slate 900 (Casi negro) */
-  --text-muted: #64748b; /* Slate 500 */
+  --bg-alt: #f1f5f9; 
+  --text-main: #0f172a; 
+  --text-muted: #64748b; 
   
   /* Acentos */
-  --primary: #2563eb; /* Azul Royal intenso */
+  --primary: #2563eb; 
   --primary-dark: #1e40af;
-  --accent: #0d9488; /* Teal profesional */
+  --accent: #0d9488; 
   
   /* Bordes y Glass */
   --border: #e2e8f0;
@@ -27,7 +27,12 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+
+
+html { 
+  scroll-behavior: smooth; 
+  scroll-padding-top: 180px; /* <--- AGREGA ESTO. Es el "colchón" de seguridad */
+}
 
 body {
   margin: 0;
@@ -39,9 +44,7 @@ body {
 }
 
 /* --- 2. TIPOGRAFÍA & GLOBALES --- */
-section {
-  text-align: center; /* Todo centrado por defecto */
-}
+section { text-align: center; }
 
 h1, h2, h3 {
   margin: 0 0 1rem 0;
@@ -52,19 +55,14 @@ h1, h2, h3 {
 }
 
 h1 { font-size: clamp(3rem, 6vw, 4.5rem); }
-
-h2 { 
-  font-size: 3rem; /* Tamaño aumentado */
-  margin-bottom: 50px; 
-}
-
+h2 { font-size: 3rem; margin-bottom: 50px; }
 h3 { font-size: 1.35rem; font-weight: 700; }
 
 p {
-  margin: 0 auto 1.5rem auto; /* Centrado */
+  margin: 0 auto 1.5rem auto; 
   color: var(--text-muted);
-  max-width: 75ch; /* Ancho máximo de lectura */
-  font-size: 1.25rem; /* Texto más grande y legible */
+  max-width: 75ch; 
+  font-size: 1.25rem; 
   line-height: 1.7;
 }
 
@@ -79,7 +77,7 @@ a { color: inherit; text-decoration: none; transition: 0.2s; }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 
 
-/* --- 3. HEADER --- */
+/* --- 3. HEADER "BESTIA" (Menú Pro + Botón Fantasma) --- */
 header {
   position: sticky;
   top: 0;
@@ -99,7 +97,7 @@ nav {
 }
 
 nav .logo img {
-  height: 85px; /* Logo Grande */
+  height: 85px; 
   width: auto;
   display: block;
   transition: all 0.3s ease;
@@ -117,37 +115,74 @@ nav ul {
   nav ul { display: none; }
 }
 
+/* Enlaces "BESTIA" (Mayúsculas + Hover Láser) */
 nav ul a {
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
   color: var(--text-main);
-  opacity: 0.8;
+  text-transform: uppercase; /* MAYÚSCULAS */
+  letter-spacing: 0.05em;    /* Un poco de aire */
+  position: relative;        /* Para el efecto láser */
+  padding-bottom: 4px;
 }
 
-nav ul a:hover { opacity: 1; color: var(--primary); }
+/* El Rayo Láser Azul */
+nav ul a::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--primary);
+  transition: width 0.3s ease-in-out;
+}
 
-nav > a:last-child:not(.logo) {
+nav ul a:hover { color: var(--primary); }
+nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
+
+
+/* Botón "Fantasma" del Menú (Se oculta al inicio) */
+.nav-cta {
   background: var(--text-main);
   color: white;
   padding: 12px 24px;
   border-radius: 50px;
   font-weight: 600;
   font-size: 0.95rem;
+  opacity: 0;            /* Invisible por defecto */
+  pointer-events: none;  /* No se puede clickear si no se ve */
+  transform: translateY(-10px);
+  transition: all 0.4s ease;
 }
-nav > a:last-child:not(.logo):hover { background: var(--primary); }
+.nav-cta:hover { background: var(--primary); }
+
+/* Clase que JS agregará para mostrar el botón */
+.nav-cta.show-me {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
 
 
-/* --- 4. MARQUEE (Cinta Superior Blanca/Azul) --- */
+/* --- 4. MARQUEE --- */
+
 .marquee {
   width: 100%;
   z-index: 500;
   background: #ffffff;
-  border-bottom: 1px solid var(--border);
-  padding: 8px 0; /* Fina */
+  
+  /* --- AGREGA ESTOS BORDES --- */
+  border-top: 1px solid #cbd5e1;    /* Línea gris arriba */
+  border-bottom: 1px solid #cbd5e1; /* Línea gris abajo */
+  /* --------------------------- */
+  
+  padding: 10px 0; /* Un poquito más de aire */
   overflow: hidden;
   position: relative;
   margin: 0;
 }
+
 
 .marquee__track {
   display: flex;
@@ -157,7 +192,7 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
 }
 
 .mq-item {
-  color: var(--primary); /* Azul Corporativo */
+  color: var(--primary); 
   font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -165,38 +200,24 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
   display: flex; align-items: center; gap: 12px;
 }
 
-/* Asegurar color en span interno */
 .mq-text { color: var(--primary); }
-
 @keyframes scroll { to { transform: translateX(-50%); } }
 
 
 /* --- 5. HERO SECTION --- */
-
 #hero {
-  /* CAMBIO CLAVE: Altura mínima del 85% de la pantalla */
   min-height: 85vh; 
-  
-  /* Esto centra el texto verticalmente en ese espacio grande */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center; /* Asegura centrado horizontal también */
-
+  align-items: center; 
   padding: 140px 24px 100px;
   position: relative;
   overflow: hidden;
   background: linear-gradient(to bottom, #fff 0%, #f8fafc 100%);
 }
 
-
-
-
-
-
-
-
-/* Foto de fondo Hero */
+/* Foto de fondo Hero - AJUSTADA */
 #hero::before {
   content: "";
   position: absolute;
@@ -204,28 +225,25 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
   background-image: url('../img/hero/hero.jpg'); 
   background-size: cover;
   background-position: center;
-  opacity: 0.40; /* Intensidad media */
-  filter: none; /* A todo color */
+  /* CAMBIO: Opacidad subida a 0.75 para que se vea nítida la oficina */
+  opacity: 0.75; 
+  filter: none; 
   z-index: 0;
   pointer-events: none;
 }
-
-
-
 
 #hero > * { position: relative; z-index: 1; }
 
 #hero h1 {
   max-width: 18ch;
   margin: 0 auto 32px;
-  /* Gradiente en el texto del título */
   background: linear-gradient(180deg, var(--text-main) 20%, #475569 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 #hero p {
-  color: #0f172a; /* Texto oscuro para legibilidad sobre foto */
+  color: #0f172a; 
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
   margin-bottom: 48px;
@@ -253,10 +271,21 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
 }
 #hero div a:first-child:hover { transform: translateY(-3px); box-shadow: 0 20px 30px -5px rgba(37, 99, 235, 0.5); }
 
+
+/* Botón Secundario (View Services) - VERSIÓN MEJORADA */
 #hero div a:last-child {
-  background: white; border: 1px solid var(--border); color: var(--text-main);
+  background: rgba(255, 255, 255, 0.9); /* Blanco casi sólido */
+  border: 2px solid #0f172a; /* Borde OSCURO para que se vea la caja */
+  color: #0f172a; /* Texto oscuro */
 }
-#hero div a:last-child:hover { border-color: var(--text-main); }
+
+/* Al pasar el mouse, se invierte para efecto visual */
+#hero div a:last-child:hover {
+  background: #0f172a; /* Fondo oscuro */
+  color: white; /* Texto blanco */
+  border-color: #0f172a;
+}
+
 
 
 /* --- 6. SERVICES --- */
@@ -267,70 +296,34 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
   overflow: hidden;
 }
 
-/* Mosaico de fondo Services */
-
-/* --- REEMPLAZA TU SECCIÓN ACTUAL DE SERVICES CON ESTO --- */
-
-/* 1. Fondo: Más visible y definido */
+/* Mosaico de fondo Services - Invisible por petición anterior */
 #services::before {
   content: "";
-  position: absolute;
-  inset: 0;
-  display: none;
-  background-image: 
-    url('../img/services/office.jpg'),
-    url('../img/services/retail.jpg'),
-    url('../img/services/deep.jpg');
-  background-repeat: no-repeat;
-  background-position: left top, center center, right bottom;
-  background-size: 4  0% auto; /* Fotos más grandes */
-  opacity: 0.25; /* ANTES: 0.03 (invisible). AHORA: 0.25 (visible) */
-  filter: saturate(1.2) contrast(1.1); /* Colores vivos, no grises */
-  pointer-events: none;
+  display: none; /* OCULTO */
 }
 
-/* 2. Tarjetas: Efecto Vidrio Esmerilado (Premium) */
+/* Tarjetas: Efecto Vidrio Esmerilado */
 #services article {
   padding: 40px;
   border-radius: 24px;
-  
-  /* LA MAGIA DEL CRISTAL */
-  background: rgba(255, 255, 255, 0.7); /* Blanco al 70% de opacidad */
-  backdrop-filter: blur(12px); /* Desenfoca lo que hay detrás */
-  -webkit-backdrop-filter: blur(12px); /* Para Safari */
-  
-  border: 1px solid rgba(255, 255, 255, 0.6); /* Borde blanco sutil */
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); /* Sombra suave de color */
-  
+  background: rgba(255, 255, 255, 0.7); 
+  backdrop-filter: blur(12px); 
+  -webkit-backdrop-filter: blur(12px); 
+  border: 1px solid rgba(255, 255, 255, 0.6); 
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
   transition: 0.3s ease;
   margin-bottom: 20px;
 }
 
-/* Hover: Se vuelve más sólido y sube */
 #services article:hover {
-  background: rgba(255, 255, 255, 0.9); /* Casi sólido al pasar el mouse */
+  background: rgba(255, 255, 255, 0.9); 
   border-color: var(--primary);
   transform: translateY(-8px);
   box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
 }
 
-
-
-
 #services > * { position: relative; z-index: 1; }
 
-@media (min-width: 768px) {
-  #services article { text-align: left; } /* Tarjetas alineadas a izq internamente */
-  
-  .services-grid-container { /* Contenedor interno si lo tuvieras, sino usamos grid directo */
-     display: grid;
-     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-     gap: 32px;
-     max-width: 1300px;
-     margin: 0 auto;
-  }
-}
-/* Aplicamos Grid directamente a sections hijos articles */
 @media (min-width: 768px) {
     #services {
         display: grid;
@@ -340,24 +333,8 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
         margin: 0 auto;
         padding-top: 120px;
     }
+    #services article { text-align: left; margin-bottom: 0; }
     #services > h2, #services > p:last-child { grid-column: 1 / -1; text-align: center; }
-}
-
-#services article {
-  padding: 40px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.95); /* Fondo blanco casi opaco */
-  border: 1px solid var(--border);
-  transition: 0.3s ease;
-  margin-bottom: 20px; /* Margen móvil */
-}
-
-@media (min-width: 768px) { #services article { margin-bottom: 0; } }
-
-#services article:hover {
-  border-color: var(--primary);
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-8px);
 }
 
 .service-title {
@@ -375,30 +352,41 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
   fill: var(--primary);
 }
 
-/* --- PEGAR ESTO AQUÍ --- */
-
 /* Control estricto para las fotos de las tarjetas */
 .card-img-top {
     width: 100%;            
-    height: 200px;          /* Altura fija obligatoria */
-    object-fit: cover;      /* Recorta la imagen para que no se deforme */
+    height: 200px;          
+    object-fit: cover;      
     border-radius: 12px;    
     margin-bottom: 1.5rem;  
     display: block;
 }
 
-/* ----------------------- */
 
-/* --- 7. WHY OC CLEAN (Dark Theme) --- */
+/* --- 7. WHY OC CLEAN (GRID LAYOUT) --- */
+
+
 #why {
   position: relative;
   background: #0f172a;
   color: white;
   overflow: hidden;
   border-radius: 32px;
-  margin: 40px 24px;
-  padding: 80px 24px;
+
+  /* --- CAMBIO DE TAMAÑO (Para que se vea "Perrón") --- */
+  max-width: 1300px;  /* Mismo tope que Services */
+  width: 90%;         /* Deja margenes a los lados en pantallas chicas */
+  margin: 60px auto;  /* Se centra automáticamente */
+  padding: 80px 40px;
+
+  /* --- MODO GRILLA (Columnas) --- */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  text-align: left;
 }
+
+
 
 #why::before {
   content: "";
@@ -407,44 +395,72 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
   background-image: url('../img/trust/trust.jpg');
   background-size: cover;
   background-position: center;
-  opacity: 0.2;
+  opacity: 0.15;
   mix-blend-mode: overlay;
   pointer-events: none;
 }
+
 #why > * { position: relative; z-index: 1; }
 
-#why h2, #why h3 { color: white; }
-#why p { color: #cbd5e1; } /* Gris claro */
+/* El título ocupa todo el ancho de arriba */
+#why h2 { 
+  grid-column: 1 / -1; 
+  text-align: center; 
+  margin-bottom: 60px;
+  color: white;
+}
 
-#why article { margin-bottom: 40px; }
+#why article h3 { color: white; margin-bottom: 12px; font-size: 1.25rem; }
+#why article p { color: #cbd5e1; font-size: 1rem; margin: 0; }
 
 
-/* --- 8. HOW IT WORKS & VIDEOS --- */
-#how, #videos {
+/* --- 8. HOW IT WORKS (HORIZONTAL STEPS) --- */
+#how {
   padding: 100px 24px;
-  max-width: 1000px;
+  max-width: 1300px;
   margin: 0 auto;
 }
 
-#how ol {
-  text-align: left;
-  max-width: 600px;
-  margin: 0 auto 40px;
-  font-size: 1.15rem;
-  line-height: 1.8;
-  color: var(--text-muted);
-}
-#how li { margin-bottom: 16px; }
+#how h2 { margin-bottom: 60px; }
 
-/* Ajuste Videos */
-#videos article {
-  display: inline-block;
-  vertical-align: top;
-  margin: 20px;
-  width: 100%;
-  max-width: 300px;
-  text-align: left;
+#how ol {
+  display: grid; /* También lo hacemos grilla */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 4 Pasos en fila */
+  gap: 30px;
+  list-style: none; /* Quitamos los números feos por defecto */
+  padding: 0;
+  margin: 0;
 }
+
+#how li {
+  background: #f8fafc; /* Fondo gris muy suave para cada paso */
+  padding: 30px;
+  border-radius: 20px;
+  text-align: left;
+  border: 1px solid var(--border);
+  transition: 0.3s;
+}
+
+#how li:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-card);
+}
+
+/* Le ponemos negrita al título de cada paso para que resalte */
+#how li strong {
+  display: block;
+  color: var(--primary);
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+
+
+
+
+
+
 
 
 /* --- 9. ESTIMATE FORM --- */
@@ -460,10 +476,9 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
   box-shadow: var(--shadow-card);
   max-width: 900px;
   margin: 60px auto 0;
-  text-align: left; /* Formulario alineado a la izq internamente */
+  text-align: left; 
 }
 
-/* Tarjetas de Selección */
 .choice-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -485,7 +500,6 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
 }
 
 .choice-card input { position: absolute; opacity: 0; height: 0; width: 0; }
-
 .choice-card-title { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
 .choice-card-sub { font-size: 0.95rem; color: var(--text-muted); line-height: 1.4; }
 
@@ -497,7 +511,6 @@ nav > a:last-child:not(.logo):hover { background: var(--primary); }
 }
 .choice-card.is-selected .choice-card-title { color: var(--primary); }
 
-/* Inputs */
 .form-grid { display: grid; gap: 24px; }
 @media (min-width: 600px) { 
   .form-grid { grid-template-columns: 1fr 1fr; }
@@ -564,35 +577,31 @@ footer a { color: #cbd5e1; font-weight: 500; text-decoration: underline; }
 footer a:hover { color: white; }
 
 
-
 /* Arreglo de legibilidad para el texto pequeño de Services */
 #services > p:last-child {
-  background: rgba(255, 255, 255, 0.9); /* Fondo blanco casi sólido */
+  background: rgba(255, 255, 255, 0.9); 
   padding: 10px 20px;
-  border-radius: 50px; /* Forma de píldora */
-  display: inline-block; /* Se ajusta al tamaño del texto */
+  border-radius: 50px; 
+  display: inline-block; 
   font-weight: 600;
-  font-size: 0.95rem !important; /* Un poco más pequeño pero nítido */
+  font-size: 0.95rem !important; 
   color: var(--text-main);
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   margin-top: 40px;
 }
 
-
-/* --- PEGAR ESTO AL FINAL DE LA SECCIÓN 6. SERVICES --- */
-
-/* Control para las fotos dentro de las tarjetas de servicios */
+/* Control para las fotos dentro de las tarjetas de servicios (Legacy fix) */
 #services article img {
-    width: 100%;           /* Ocupa todo el ancho disponible */
-    height: 220px;         /* Altura fija para que no sean gigantes */
-    object-fit: cover;     /* Recorta la imagen para que no se deforme */
-    border-radius: 12px;   /* Bordes redondeados suaves */
-    margin-bottom: 1.5rem; /* Espacio debajo de la foto */
-    display: block;        /* Asegura que se comporte como bloque */
+    width: 100%;           
+    height: 220px;         
+    object-fit: cover;     
+    border-radius: 12px;   
+    margin-bottom: 1.5rem; 
+    display: block;        
 }
 
 
-/* --- CORRECCIONES PARA CELULARES (RESPONSIVE) - VERSIÓN FINAL --- */
+/* --- CORRECCIONES PARA CELULARES (RESPONSIVE) - VERSIÓN FINAL CON ARREGLO DE BOTÓN --- */
 @media (max-width: 768px) {
   
   /* 1. La Portada (Hero) ajustada */
@@ -608,21 +617,267 @@ footer a:hover { color: white; }
     margin-bottom: 1.5rem; 
   }
 
-  /* 3. ESTE ES EL NUEVO: El texto descriptivo más suave */
+  /* 3. El texto descriptivo más suave */
   #hero p {
     font-size: 1.15rem;     
     font-weight: 500;     
     padding: 0 15px;      
     margin-bottom: 2rem;
   }
+  
+  /* 4. ARREGLO DEL BOTÓN AZUL PARTIDO EN CELULAR */
+  #hero div a:first-child {
+    padding: 18px 20px; /* Reducimos padding lateral */
+    font-size: 1rem;    /* Texto un poco más chico */
+    white-space: nowrap; /* FUERZA 1 SOLA LÍNEA */
+    width: 100%; /* Que ocupe todo el ancho disponible */
+    text-align: center;
+  }
+  
+  #hero div {
+    flex-direction: column; /* Botones en columna vertical */
+    gap: 15px;
+    width: 100%;
+    padding: 0 20px;
+  }
+  
+  #hero div a:last-child {
+      width: 100%;
+      text-align: center;
+  }
 
-  /* 4. Las fotos de servicios controladas */
+  /* 5. Las fotos de servicios controladas */
   .card-img-top {
     height: 160px; 
   }
   
-  /* 5. Ajuste de padding en las tarjetas */
+  /* 6. Ajuste de padding en las tarjetas */
   #services article {
     padding: 25px; 
   }
+}
+
+
+/* --- 1. ELIMINACIÓN TOTAL DEL BOTÓN DERECHO --- */
+/* Esto busca específicamente el enlace de "Request a Quote" fuera de la lista y lo oculta */
+nav > a[href="#estimate"] {
+    display: none !important;
+}
+
+/* --- 2. MENÚ MÁS GRANDE Y POTENTE --- */
+/* Hacemos las letras más grandes y gruesas para que llenen el espacio */
+nav ul a {
+    font-size: 1.05rem !important; /* Aumentamos tamaño (antes era 0.9rem) */
+    font-weight: 900 !important;   /* Ultra Negrita (Black) para máxima presencia */
+    letter-spacing: 0.5px;         /* Un poquito de aire para elegancia */
+    color: #0f172a !important;     /* Color oscuro intenso */
+}
+
+/* Ajuste del espacio entre palabras del menú */
+nav ul {
+    gap: 50px !important; /* Separamos más los elementos (antes 40px) */
+}
+
+
+
+
+
+
+
+/* --- 1. MATAR AL INTRUSO (El botón duplicado de afuera) --- */
+nav > a[href="#estimate"]:not(.logo) {
+    display: none !important;
+}
+
+/* --- 2. MAQUILLAR EL TEXTO DE ADENTRO (Para que destaque) --- */
+/* Buscamos el enlace específico dentro del menú que lleva al estimado */
+nav ul a[href="#estimate"] {
+    color: var(--primary) !important; /* Lo ponemos AZUL (tu color principal) */
+    border: 2px solid var(--primary); /* Le ponemos un marco azul */
+    padding: 8px 24px;      /* Le damos aire a los lados */
+    border-radius: 50px;    /* Bordes redondos */
+    transition: all 0.3s ease;
+}
+
+/* Cuando le pasas el mouse, se llena de azul */
+nav ul a[href="#estimate"]:hover {
+    background: var(--primary);
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); /* Un brillito azul */
+}
+
+
+
+
+/* --- AMOR PARA LA SECCIÓN DE VIDEOS (Galería Pro) --- */
+
+/* 1. Convertimos el contenedor en una Grilla de 3 columnas */
+#videos div[aria-label="Video placeholders"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+/* 2. Convertimos cada texto en una "Tarjeta de Video" */
+#videos article {
+  background: #f1f5f9; /* Gris claro de fondo */
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  position: relative;
+  
+  /* Esto crea el aspecto de video (altura fija) */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Texto abajo */
+  height: 250px; /* Altura de video */
+  padding: 20px;
+}
+
+/* 3. Creamos un botón de "Play" falso en el centro con CSS puro */
+#videos article::before {
+  content: "▶"; /* Triángulo de Play */
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%); /* Centrado perfecto */
+  
+  width: 60px; height: 60px;
+  background: white;
+  color: var(--primary);
+  border-radius: 50%; /* Círculo */
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  padding-left: 5px; /* Ajuste visual */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+/* 4. Efecto Hover (Al pasar el mouse) */
+#videos article:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary);
+}
+#videos article:hover::before {
+  background: var(--primary);
+  color: white;
+  transform: translate(-50%, -50%) scale(1.1); /* Crece un poquito */
+}
+
+/* 5. Estilo de los textos dentro de la tarjeta */
+#videos h3 {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  z-index: 2;
+  color: #0f172a;
+}
+#videos p {
+  font-size: 0.9rem;
+  margin: 0;
+  z-index: 2;
+  opacity: 0.8;
+}
+
+/* --- DETALLE EXTRA: Arreglar la frase huérfana de "Preferred contact method" --- */
+#how > p:last-child {
+  background: #eff6ff; /* Azul muy clarito */
+  color: var(--primary);
+  font-weight: 700;
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 50px;
+  margin-top: 30px;
+  font-size: 0.9rem;
+}
+
+
+
+/* --- AMOR PARA LAS TARJETAS DEL FORMULARIO (Iconos Pro) --- */
+
+/* 1. Contenedor del icono (Círculo suave de fondo) */
+.card-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: #eff6ff; /* Azul muy clarito */
+  border-radius: 50%; /* Círculo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px; /* Separación del título */
+  transition: 0.3s ease;
+}
+
+/* 2. El icono en sí (El dibujo SVG) */
+.card-icon-wrapper .icon {
+  width: 32px;
+  height: 32px;
+  fill: var(--primary); /* Azul corporativo */
+}
+
+/* 3. Efecto al pasar el mouse (La tarjeta se activa) */
+.choice-card:hover .card-icon-wrapper {
+  background: var(--primary); /* El círculo se vuelve azul fuerte */
+  transform: scale(1.1); /* Crece un poquito */
+}
+
+.choice-card:hover .card-icon-wrapper .icon {
+  fill: white; /* El icono se vuelve blanco para contrastar */
+}
+
+/* 4. Cuando está seleccionado (Clickeado) */
+.choice-card.is-selected .card-icon-wrapper {
+  background: var(--primary);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+.choice-card.is-selected .card-icon-wrapper .icon {
+  fill: white;
+}
+
+
+
+/* --- AMOR PARA EL FORMULARIO (MODERNIZACIÓN FINAL) --- */
+
+/* 1. Quitar los bordes viejos de las secciones (Fieldsets) */
+#estimateForm fieldset {
+  border: none !important; /* Adiós borde gris feo */
+  padding: 0 !important;
+  margin: 0 0 40px 0 !important;
+}
+
+/* 2. Poner los títulos de sección más guapos */
+#estimateForm legend {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 24px;
+  padding: 0;
+  width: 100%;
+  border-bottom: 2px solid var(--bg-alt); /* Una línea sutil solo abajo del título */
+  padding-bottom: 10px;
+}
+
+/* 3. El Botón de Enviar: DE NEGRO A AZUL VIBRANTE */
+button[type="submit"] {
+  background: var(--primary) !important; /* Azul Corporativo */
+  box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.5); /* Sombra azul brillante */
+  font-size: 1.3rem; /* Un pelín más grande */
+  transition: all 0.3s ease;
+}
+
+/* Efecto al pasar el mouse por el botón */
+button[type="submit"]:hover {
+  background: var(--primary-dark) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -5px rgba(37, 99, 235, 0.6);
+}
+
+/* 4. Inputs más "gorditos" y modernos */
+input, select, textarea {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 16px !important; /* Más espacio interno */
+  font-size: 1.05rem;
+  border-radius: 12px;
 }
