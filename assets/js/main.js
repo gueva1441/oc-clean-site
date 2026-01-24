@@ -1,9 +1,9 @@
-// main.js - Premium Interactions & Logic
+// main.js - Premium Interactions & Logic (Conectado a n8n)
 
 // 1. Scroll Reveal with Staggered Effect (Animación de entrada)
 document.addEventListener("DOMContentLoaded", () => {
   const options = {
-    threshold: 0.15, // Espera a que el 15% del elemento sea visible
+    threshold: 0.15,
     rootMargin: "0px 0px -50px 0px"
   };
 
@@ -11,24 +11,23 @@ document.addEventListener("DOMContentLoaded", () => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         entry.target.classList.add("is-visible");
-        observer.unobserve(entry.target); // Dejar de observar una vez animado
+        observer.unobserve(entry.target);
       }
     });
   }, options);
 
-  // Seleccionamos elementos para animar
   const animatedElements = document.querySelectorAll(
     "section h2, section p, article, .marquee, form"
   );
 
-  animatedElements.forEach((el, index) => {
+  animatedElements.forEach((el) => {
     el.classList.add("reveal");
     observer.observe(el);
   });
 });
 
 
-// 2. Form Logic (Lógica del Formulario + Auto-Scroll)
+// 2. Form Logic (Lógica del Formulario + Auto-Scroll + n8n)
 (() => {
   const form = document.getElementById("estimateForm");
   if (!form) return;
@@ -38,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const commercial = document.getElementById("commercialFields");
   const special = document.getElementById("specialFields");
   const formStatus = document.getElementById("formStatus");
+  const submitBtn = document.getElementById("submitBtn"); // Agregamos referencia al botón
 
   // Helper para mostrar/ocultar con animación simple
   const toggleVisibility = (element, show) => {
@@ -54,20 +54,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const updateUI = () => {
     const selected = radios.find(r => r.checked)?.value;
     
-    // 1. Highlight Cards (Resaltar tarjeta seleccionada)
+    // 1. Highlight Cards
     document.querySelectorAll('.choice-card').forEach(card => {
       const input = card.querySelector('input');
       if (input.checked) card.classList.add('is-selected');
       else card.classList.remove('is-selected');
     });
 
-    // 2. Show Fields (Mostrar campos correspondientes)
+    // 2. Show Fields
     if (selected) hiddenCategory.value = selected;
     
     toggleVisibility(commercial, selected === 'commercial');
     toggleVisibility(special, selected === 'special');
     
-    // Mostrar resto del formulario (contacto y botón) si hay selección
+    // Mostrar resto del formulario
     const contactSet = form.querySelector('fieldset:last-of-type');
     const actions = form.querySelector('.form-actions');
     
@@ -80,30 +80,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // --- AQUÍ ESTÁ LA MAGIA DEL AUTO-SCROLL ---
+  // --- AUTO-SCROLL MEJORADO (FRANCOTIRADOR) ---
   radios.forEach(r => r.addEventListener('change', (e) => {
-    // 1. Primero actualizamos la pantalla (mostramos los campos)
     updateUI();
 
-    // 2. Esperamos un instante a que el navegador pinte los campos nuevos
+    // Esperamos un instante a que el navegador pinte los campos nuevos
     setTimeout(() => {
         const selectedValue = e.target.value;
         const targetId = selectedValue === 'commercial' ? 'commercialFields' : 'specialFields';
         const targetSection = document.getElementById(targetId);
         
-        // 3. Deslizamos suavemente hacia la sección nueva
+        // CÁLCULO MANUAL (Para que el menú no tape el título)
         if (targetSection) {
-            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const y = targetSection.getBoundingClientRect().top + window.scrollY - 100;
+            window.scrollTo({top: y, behavior: 'smooth'});
         }
-    }, 150); // 150ms de pausa para suavidad
+    }, 150);
   }));
 
-  // Validación básica al enviar
-  form.addEventListener('submit', (e) => {
+  // --- ENVÍO REAL A N8N ---
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    // 1. Validación Visual
     const required = form.querySelectorAll('[required]');
     let isValid = true;
-    
     required.forEach(field => {
       if (!field.value.trim()) {
         isValid = false;
@@ -113,23 +114,74 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    if (isValid) {
-      if(formStatus) formStatus.textContent = "Thank you. Processing your request...";
-      formStatus.style.color = "green";
-      
-      // Simulación de envío (Aquí conectaremos n8n luego)
-      setTimeout(() => {
+    if (!isValid) {
+      if(formStatus) {
+          formStatus.textContent = "Please complete all required fields.";
+          formStatus.style.color = "red";
+      }
+      return;
+    }
+
+    // 2. Preparar Envío
+    if(formStatus) {
+        formStatus.textContent = "Sending request...";
+        formStatus.style.color = "#0f172a";
+    }
+    // Deshabilitar botón para evitar doble clic
+    if(submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Processing...";
+    }
+
+    // 3. Capturar Datos
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      // 4. Disparar al Webhook de Producción
+      const response = await fetch('https://n8n.northmasters.ca/webhook/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        // 5. Éxito
         form.reset();
-        updateUI();
-        formStatus.textContent = "Request sent! We will be in touch shortly.";
-      }, 1500);
-      
-    } else {
-      if(formStatus) formStatus.textContent = "Please complete all required fields.";
+        updateUI(); // Resetea visualmente el formulario
+        formStatus.textContent = "✅ Request sent! We'll contact you shortly.";
+        formStatus.style.color = "green";
+        
+        if(submitBtn) submitBtn.textContent = "Request Sent";
+        
+        // Restaurar botón después de 5 segundos
+        setTimeout(() => {
+            if(submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Request a Free Quote";
+            }
+            formStatus.textContent = "";
+        }, 5000);
+
+      } else {
+        throw new Error('Server returned ' + response.status);
+      }
+
+    } catch (error) {
+      // 6. Error
+      console.error('Error sending form:', error);
+      formStatus.textContent = "❌ Error connecting to server. Please email us at oc@northmasters.ca";
       formStatus.style.color = "red";
+      
+      if(submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Try Again";
+      }
     }
   });
 
-  // Inicializar estado (por si el navegador guarda caché del formulario)
+  // Inicializar estado
   updateUI();
 })();
