@@ -1,4 +1,4 @@
-// main.js - Premium Interactions & Logic (Conectado a n8n)
+// main.js - Premium Interactions & Logic (Conectado a n8n + Custom Modal)
 
 // 1. Scroll Reveal with Staggered Effect (Animación de entrada)
 document.addEventListener("DOMContentLoaded", () => {
@@ -27,17 +27,29 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// 2. Form Logic (Lógica del Formulario + Auto-Scroll + n8n)
+// 2. Form Logic (Lógica del Formulario + n8n + MODAL)
 (() => {
   const form = document.getElementById("estimateForm");
   if (!form) return;
 
+  // -- Elementos del Formulario --
   const hiddenCategory = document.getElementById("service_category");
   const radios = Array.from(form.querySelectorAll('input[name="service_category_choice"]'));
   const commercial = document.getElementById("commercialFields");
   const special = document.getElementById("specialFields");
   const formStatus = document.getElementById("formStatus");
-  const submitBtn = document.getElementById("submitBtn"); // Agregamos referencia al botón
+  const submitBtn = document.getElementById("submitBtn");
+
+  // -- Elementos del MODAL NUEVO --
+  const modal = document.getElementById("customModal");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+
+  // Función para cerrar el modal
+  if (closeModalBtn && modal) {
+    closeModalBtn.addEventListener("click", () => {
+      modal.classList.remove("active");
+    });
+  }
 
   // Helper para mostrar/ocultar con animación simple
   const toggleVisibility = (element, show) => {
@@ -80,17 +92,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // --- AUTO-SCROLL MEJORADO (FRANCOTIRADOR) ---
+  // --- AUTO-SCROLL MEJORADO ---
   radios.forEach(r => r.addEventListener('change', (e) => {
     updateUI();
-
-    // Esperamos un instante a que el navegador pinte los campos nuevos
     setTimeout(() => {
         const selectedValue = e.target.value;
         const targetId = selectedValue === 'commercial' ? 'commercialFields' : 'specialFields';
         const targetSection = document.getElementById(targetId);
         
-        // CÁLCULO MANUAL (Para que el menú no tape el título)
         if (targetSection) {
             const y = targetSection.getBoundingClientRect().top + window.scrollY - 100;
             window.scrollTo({top: y, behavior: 'smooth'});
@@ -127,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
         formStatus.textContent = "Sending request...";
         formStatus.style.color = "#0f172a";
     }
-    // Deshabilitar botón para evitar doble clic
     if(submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = "Processing...";
@@ -138,43 +146,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = Object.fromEntries(formData.entries());
 
     try {
-      // 4. Disparar al Webhook de Producción
       const response = await fetch('https://n8n.northmasters.ca/webhook/contact', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
 
       if (response.ok) {
-        // 5. Éxito
+        // --- ÉXITO: ABRIMOS EL MODAL ---
         form.reset();
-        updateUI(); // Resetea visualmente el formulario
-        formStatus.textContent = "✅ Request sent! We'll contact you shortly.";
-        formStatus.style.color = "green";
+        updateUI(); 
         
-        if(submitBtn) submitBtn.textContent = "Request Sent";
+        // 1. Activamos la ventana modal
+        if (modal) modal.classList.add("active");
+
+        // 2. Mensajes pequeños de respaldo
+        if(formStatus) {
+            formStatus.textContent = "Success!";
+            formStatus.style.color = "green";
+        }
+        if(submitBtn) submitBtn.textContent = "Sent!";
         
-        // Restaurar botón después de 5 segundos
+        // 3. Restaurar botón
         setTimeout(() => {
             if(submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "Request a Free Quote";
+                submitBtn.textContent = "Submit Request";
             }
-            formStatus.textContent = "";
-        }, 5000);
+            if(formStatus) formStatus.textContent = "";
+        }, 3000);
 
       } else {
         throw new Error('Server returned ' + response.status);
       }
 
     } catch (error) {
-      // 6. Error
       console.error('Error sending form:', error);
-      formStatus.textContent = "❌ Error connecting to server. Please email us at oc@northmasters.ca";
+      formStatus.textContent = "❌ Error connecting. Please email us directly.";
       formStatus.style.color = "red";
-      
       if(submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = "Try Again";
