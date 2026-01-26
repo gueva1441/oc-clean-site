@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeModalBtn = document.getElementById("closeModalBtn");
 
   // URL for n8n Production Webhook
-  const WEBHOOK_URL = 'https://n8n.northmasters.ca/webhook-test/contact';
+  const WEBHOOK_URL = 'https://n8n.northmasters.ca/webhook/contact';
 
   // Modal Close Logic
   if (closeModalBtn && modal) {
