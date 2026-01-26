@@ -1,4 +1,4 @@
-/* style.css - OC Clean Masters (Versión FINAL v5.0 - Logo Grande & Alineado) */
+/* style.css - OC Clean Masters (Versión FINAL "Bestia" - Fixed & Mobile Ready) */
 
 /* --- 1. VARIABLES & RESET --- */
 :root {
@@ -29,7 +29,8 @@
 
 html { 
   scroll-behavior: smooth; 
-  scroll-padding-top: 150px; 
+  scroll-padding-top: 150px; /* Colchón para que el menú no tape títulos */
+  /* ELIMINADO: overflow-x: hidden; (Esto mataba el sticky header) */
 }
 
 body {
@@ -41,6 +42,7 @@ body {
   -webkit-font-smoothing: antialiased;
   width: 100%;
   position: relative;
+  /* ELIMINADO: overflow-x: hidden; */
 }
 
 /* --- 2. TIPOGRAFÍA & GLOBALES --- */
@@ -79,12 +81,12 @@ a { color: inherit; text-decoration: none; transition: 0.2s; }
 
 /* --- 3. HEADER & NAVEGACIÓN (Sticky + Mobile) --- */
 header {
-  position: -webkit-sticky; 
-  position: sticky;         
+  position: -webkit-sticky; /* Soporte Safari */
+  position: sticky;         /* El estándar que hace el "Freeze" */
   top: 0;
   z-index: 1000;
   width: 100%;
-  background: rgba(255, 255, 255, 0.98); /* Un poco más opaco para leer mejor */
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -97,7 +99,7 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: relative;
+  position: relative; /* Necesario para el menú móvil absoluto */
 }
 
 nav .logo img {
@@ -127,6 +129,7 @@ nav ul a {
   padding-bottom: 4px;
 }
 
+/* Línea animada al pasar el mouse */
 nav ul a::after {
   content: "";
   position: absolute;
@@ -150,7 +153,7 @@ nav ul a:hover::after { width: 100%; }
 }
 .mobile-toggle span {
     display: block;
-    width: 28px; /* Un poco más anchas las líneas */
+    width: 25px;
     height: 3px;
     background-color: var(--text-main);
     margin: 5px 0;
@@ -158,6 +161,7 @@ nav ul a:hover::after { width: 100%; }
     border-radius: 3px;
 }
 
+/* Efecto de "X" cuando está abierto */
 .mobile-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
 .mobile-toggle.open span:nth-child(2) { opacity: 0; }
 .mobile-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
@@ -178,109 +182,64 @@ nav .cta-button:hover {
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-
-/* =========================================
-   === ZONA MÓVIL REFORZADA (Alineación Perfecta) ===
-   ========================================= */
+/* === MODO MÓVIL (Menor a 900px) === */
 @media (max-width: 900px) {
+  nav { padding: 10px 20px; }
   
-  /* 1. LAYOUT FLEXIBLE: LOGO ------ BOTON HAMBURGUESA */
-  nav {
-    display: grid !important;
-    /* Col 1: Logo, Col 2: Espacio Flexible, Col 3: Botón + Hamburguesa */
-    grid-template-columns: auto 1fr auto; 
-    align-items: center !important; /* CENTRADO VERTICAL CLAVE 🎯 */
-    padding: 12px 20px !important;
-    gap: 15px;
-    height: auto;
-  }
+  nav .logo img { height: 40px; } /* Logo más pequeño */
   
-  /* 2. LOGO: ¡AHORA SÍ GRANDE! */
-  .logo img {
-    height: 50px !important; /* Aumentado de 32px a 50px */
-    width: auto;
-    object-fit: contain;
-  }
+  /* Ocultamos botón Desktop */
+  nav .cta-button { display: none; }
+  
+  /* Mostramos Hamburguesa */
+  .mobile-toggle { display: block; order: 3; }
 
-  /* 3. BOTÓN "GET QUOTE" */
-  nav .cta-button {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    
-    grid-column: 2; /* En medio */
-    justify-self: end; /* Pegado a la derecha */
-    margin-right: 10px; /* Separación con la hamburguesa */
-    
-    font-size: 0.8rem !important;
-    font-weight: 700;
-    padding: 10px 18px !important; /* Botón más "gordito" */
-    height: auto;
-    
-    background: var(--primary);
-    color: white !important;
-    border: none !important;
-    border-radius: 50px;
-    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
-  }
-
-  /* 4. HAMBURGUESA */
-  .mobile-toggle {
-    display: block;
-    grid-column: 3;
-    padding: 0;
-    margin: 0;
-  }
-  
-  /* MENÚ DESPLEGABLE */
+  /* Menú desplegable */
   nav ul {
-    display: none;
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
     position: absolute;
-    top: 100%;
+    top: 100%; /* Justo debajo del header */
     left: 0;
     width: 100%;
     background: white;
-    flex-direction: column;
-    padding: 0;
+    padding: 20px 0;
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    border-top: 1px solid #f1f5f9;
-    z-index: 999;
+    border-top: 1px solid var(--border);
+    gap: 0;
+    text-align: center;
   }
   
-  nav ul li:last-child { display: none; } /* Ocultar botón duplicado */
-  
+  /* Clase ACTIVA (controlada por JS) */
   nav ul.active { display: flex; animation: slideDown 0.3s ease-out; }
+  
+  nav ul li { width: 100%; }
   
   nav ul a {
     display: block;
-    padding: 18px 0;
-    font-size: 1.15rem;
+    padding: 15px 0;
+    font-size: 1.1rem;
     border-bottom: 1px solid var(--bg-alt);
-    text-align: center;
-    width: 100%;
+  }
+  nav ul a::after { display: none; } /* Sin línea animada en móvil */
+  
+  /* Botón Request Quote en móvil (dentro de la lista) */
+  nav ul li:last-child a {
+    margin: 20px 20px 0;
+    background: var(--primary);
+    color: white !important;
+    border-radius: 12px;
+    border: none;
   }
   
   @keyframes slideDown {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
-  /* Extras de Móvil */
-  input[type="file"]::file-selector-button {
-    background: #eff6ff;
-    color: var(--primary);
-    border: 1px solid var(--primary);
-    padding: 8px 12px;
-    border-radius: 8px;
-  }
-  
-  #hero { min-height: 55vh; padding-top: 120px; }
-  #estimateForm { padding: 24px; }
-  .choice-card { padding: 15px !important; }
 }
 
 
-/* --- 4. MARQUEE --- */
+/* --- 4. MARQUEE (Cinta de Texto) --- */
 .marquee {
   width: 100%;
   z-index: 500;
@@ -292,14 +251,23 @@ nav .cta-button:hover {
   position: relative;
   margin: 0;
 }
+
 .marquee__track {
-  display: flex; gap: 60px; animation: scroll 35s linear infinite; width: max-content;
+  display: flex;
+  gap: 60px;
+  animation: scroll 35s linear infinite;
+  width: max-content;
 }
+
 .mq-item {
-  color: var(--primary); font-size: 0.85rem; font-weight: 800;
-  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--primary); 
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   display: flex; align-items: center; gap: 12px;
 }
+
 .mq-text { color: var(--primary); }
 @keyframes scroll { to { transform: translateX(-50%); } }
 
@@ -307,80 +275,165 @@ nav .cta-button:hover {
 /* --- 5. HERO SECTION --- */
 #hero {
   min-height: 85vh; 
-  display: flex; flex-direction: column; justify-content: center; align-items: center; 
-  padding: 140px 24px 100px; position: relative; overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; 
+  padding: 140px 24px 100px;
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(to bottom, #fff 0%, #f8fafc 100%);
 }
+
 #hero::before {
-  content: ""; position: absolute; inset: 0;
+  content: "";
+  position: absolute;
+  inset: 0;
   background-image: url('../img/hero/hero.jpg'); 
-  background-size: cover; background-position: center; opacity: 0.75; pointer-events: none;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.75; 
+  pointer-events: none;
 }
+
 #hero > * { position: relative; z-index: 1; }
+
 #hero h1 {
-  max-width: 18ch; margin: 0 auto 32px;
+  max-width: 18ch;
+  margin: 0 auto 32px;
   background: linear-gradient(180deg, var(--text-main) 20%, #475569 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
+
 #hero p {
-  color: #0f172a; font-weight: 500; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); margin-bottom: 48px;
+  color: #0f172a; 
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  margin-bottom: 48px;
 }
-#hero p:last-child { font-weight: 700; margin-top: 40px; }
-#hero div { display: flex; gap: 20px; justify-content: center; margin-bottom: 60px; }
-#hero div a { padding: 18px 36px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; }
+
+#hero p:last-child {
+  font-weight: 700;
+  margin-top: 40px;
+}
+
+#hero div {
+  display: flex; gap: 20px; justify-content: center; margin-bottom: 60px;
+}
+
+#hero div a {
+  padding: 18px 36px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
 #hero div a:first-child {
-  background: var(--primary); color: white; box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.4);
+  background: var(--primary); color: white;
+  box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.4);
 }
 #hero div a:first-child:hover { transform: translateY(-3px); box-shadow: 0 20px 30px -5px rgba(37, 99, 235, 0.5); }
+
 #hero div a:last-child {
-  background: rgba(255, 255, 255, 0.9); border: 2px solid #0f172a; color: #0f172a;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #0f172a;
+  color: #0f172a;
 }
-#hero div a:last-child:hover { background: #0f172a; color: white; border-color: #0f172a; }
+#hero div a:last-child:hover {
+  background: #0f172a; color: white; border-color: #0f172a;
+}
 
 
 /* --- 6. SERVICES --- */
-#services { padding: 120px 24px; background: var(--bg); position: relative; overflow: hidden; }
+#services {
+  padding: 120px 24px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
 #services article {
-  padding: 40px; border-radius: 24px;
-  background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); 
+  padding: 40px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.7); 
+  backdrop-filter: blur(12px); 
   border: 1px solid rgba(255, 255, 255, 0.6); 
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
-  transition: 0.3s ease; margin-bottom: 20px;
+  transition: 0.3s ease;
+  margin-bottom: 20px;
 }
+
 #services article:hover {
-  background: rgba(255, 255, 255, 0.9); border-color: var(--primary);
-  transform: translateY(-8px); box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9); 
+  border-color: var(--primary);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
 }
+
 @media (min-width: 768px) {
     #services {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 32px; max-width: 1300px; margin: 0 auto; padding-top: 120px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 32px;
+        max-width: 1300px;
+        margin: 0 auto;
+        padding-top: 120px;
     }
     #services article { text-align: left; margin-bottom: 0; }
     #services > h2, #services > p:last-child { grid-column: 1 / -1; text-align: center; }
 }
-.service-title { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; font-size: 1.5rem; }
+
+.service-title {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 20px; font-size: 1.5rem;
+}
 .icon { width: 48px; height: 48px; flex-shrink: 0; fill: var(--primary); }
-.card-img-top { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; display: block; }
+.card-img-top {
+    width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; display: block;
+}
+
 #services > p:last-child {
-  background: rgba(255, 255, 255, 0.9); padding: 10px 20px; border-radius: 50px; 
-  display: inline-block; font-weight: 600; font-size: 0.95rem !important; 
-  color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 40px;
+  background: rgba(255, 255, 255, 0.9); 
+  padding: 10px 20px;
+  border-radius: 50px; 
+  display: inline-block; 
+  font-weight: 600;
+  font-size: 0.95rem !important; 
+  color: var(--text-main);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-top: 40px;
 }
 
 
 /* --- 7. WHY OC CLEAN --- */
 #why {
-  position: relative; background: #0f172a; color: white; overflow: hidden;
-  border-radius: 32px; max-width: 1300px; width: 90%; margin: 60px auto;
-  padding: 80px 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 40px; text-align: left;
+  position: relative;
+  background: #0f172a;
+  color: white;
+  overflow: hidden;
+  border-radius: 32px;
+  max-width: 1300px;
+  width: 90%;
+  margin: 60px auto;
+  padding: 80px 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  text-align: left;
 }
+
 #why::before {
-  content: ""; position: absolute; inset: 0;
-  background-image: url('../img/trust/trust.jpg'); background-size: cover; background-position: center;
-  opacity: 0.15; mix-blend-mode: overlay; pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('../img/trust/trust.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+  pointer-events: none;
 }
+
 #why > * { position: relative; z-index: 1; }
 #why h2 { grid-column: 1 / -1; text-align: center; margin-bottom: 60px; color: white; }
 #why article h3 { color: white; margin-bottom: 12px; font-size: 1.25rem; }
@@ -400,6 +453,7 @@ nav .cta-button:hover {
 }
 #how li:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: var(--shadow-card); }
 #how li strong { display: block; color: var(--primary); font-size: 1.2rem; margin-bottom: 12px; }
+
 #how > p:last-child {
   background: #eff6ff; color: var(--primary); font-weight: 700;
   display: inline-block; padding: 8px 20px; border-radius: 50px;
@@ -434,11 +488,13 @@ nav .cta-button:hover {
   background: white; padding: 48px; border-radius: 32px; box-shadow: var(--shadow-card);
   max-width: 900px; margin: 60px auto 0; text-align: left; 
 }
+
 #estimateForm fieldset { border: none !important; padding: 0 !important; margin: 0 0 40px 0 !important; }
 #estimateForm legend {
   font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 24px;
   width: 100%; border-bottom: 2px solid var(--bg-alt); padding-bottom: 10px;
 }
+
 .choice-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
 .choice-card {
   position: relative; display: flex; flex-direction: column; gap: 8px; padding: 24px;
@@ -451,6 +507,7 @@ nav .cta-button:hover {
 .choice-card input { position: absolute; opacity: 0; height: 0; width: 0; }
 .choice-card-title { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
 .choice-card-sub { font-size: 0.95rem; color: var(--text-muted); line-height: 1.4; }
+
 .card-icon-wrapper {
   width: 60px; height: 60px; background: #eff6ff; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; margin-bottom: 15px; transition: 0.3s ease;
@@ -460,8 +517,10 @@ nav .cta-button:hover {
 .choice-card:hover .card-icon-wrapper .icon { fill: white; }
 .choice-card.is-selected .card-icon-wrapper { background: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
 .choice-card.is-selected .card-icon-wrapper .icon { fill: white; }
+
 .form-grid { display: grid; gap: 24px; }
 @media (min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr; } .form-field--full { grid-column: 1 / -1; } }
+
 label { display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; color: var(--text-main); }
 input:not([type="radio"]), select, textarea {
   width: 100%; padding: 16px !important; border: 1px solid var(--border); border-radius: 12px;
@@ -470,6 +529,7 @@ input:not([type="radio"]), select, textarea {
 input:focus, select:focus, textarea:focus {
   outline: none; background: white; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
+
 button[type="submit"] {
   width: 100%; padding: 20px; margin-top: 32px;
   background: var(--primary) !important; color: white; border: none; border-radius: 16px;
