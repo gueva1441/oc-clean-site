@@ -1,8 +1,6 @@
-// main.js - Premium Interactions & Logic (Production Ready)
+// main.js - Premium Interactions & Logic (Connected to n8n Production + Custom Modal)
 
-// ---------------------------------------------------------
-// 1. SCROLL REVEAL (Entry Animation)
-// ---------------------------------------------------------
+// 1. Scroll Reveal with Staggered Effect (Entry Animation)
 document.addEventListener("DOMContentLoaded", () => {
   const options = {
     threshold: 0.15,
@@ -28,35 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// ---------------------------------------------------------
-// 2. MOBILE MENU TOGGLE (Hamburguesa) ✅ NUEVO
-// ---------------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const mobileBtn = document.querySelector('.mobile-toggle');
-  const navMenu = document.querySelector('nav ul'); // Asegúrate que tu HTML tenga <ul class="nav-menu"> o solo <ul> dentro del nav
 
-  if (mobileBtn && navMenu) {
-      mobileBtn.addEventListener('click', () => {
-          // Alternar clase 'active' para mostrar/ocultar menú
-          navMenu.classList.toggle('active');
-          
-          // Opcional: Animar el icono de hamburguesa (transformar a X)
-          mobileBtn.classList.toggle('open');
-      });
-
-      // Cerrar menú al hacer clic en cualquier enlace
-      navMenu.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', () => {
-              navMenu.classList.remove('active');
-              mobileBtn.classList.remove('open');
-          });
-      });
-  }
-});
-
-// ---------------------------------------------------------
-// 3. FORM LOGIC (Validation, Visibility, n8n)
-// ---------------------------------------------------------
+// 2. Form Logic (Field Toggling + n8n Connection + Modal)
 (() => {
   const form = document.getElementById("estimateForm");
   if (!form) return;
@@ -64,23 +35,19 @@ document.addEventListener("DOMContentLoaded", () => {
   // -- Form Elements --
   const hiddenCategory = document.getElementById("service_category");
   const radios = Array.from(form.querySelectorAll('input[name="service_category_choice"]'));
-  
-  // Sections
   const commercial = document.getElementById("commercialFields");
   const special = document.getElementById("specialFields");
-  const photosSection = document.getElementById("photosFields"); 
-  
   const formStatus = document.getElementById("formStatus");
   const submitBtn = document.getElementById("submitBtn");
-  
-  // -- File Input Selection --
-  const fileInput = form.querySelector('input[type="file"]');
 
   // -- Modal Elements --
   const modal = document.getElementById("customModal");
   const closeModalBtn = document.getElementById("closeModalBtn");
 
   // URL for n8n Production Webhook
+  //const WEBHOOK_URL = 'https://n8n.northmasters.ca/webhook/contact';
+
+  // TEst url
   const WEBHOOK_URL = 'https://n8n.northmasters.ca/webhook-test/contact';
 
   // Modal Close Logic
@@ -92,15 +59,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Helper: Toggle visibility with simple opacity transition
   const toggleVisibility = (element, show) => {
-    if (!element) return; 
     if (show) {
       element.hidden = false;
       element.style.display = 'block';
       setTimeout(() => element.style.opacity = 1, 10);
+      
+      // Enable required fields inside visible section if needed in future
+      // element.querySelectorAll('[data-required]').forEach(el => el.required = true);
     } else {
       element.hidden = true;
       element.style.display = 'none';
-      element.style.opacity = 0;
+      
+      // Disable required fields inside hidden section to prevent validation blocking
+      // element.querySelectorAll('[data-required]').forEach(el => el.required = false);
     }
   };
 
@@ -115,58 +86,29 @@ document.addEventListener("DOMContentLoaded", () => {
       else card.classList.remove('is-selected');
     });
 
-    // 2. Set Hidden Value
+    // 2. Show/Hide Sections
     if (selected) hiddenCategory.value = selected;
     
-    // 3. Show/Hide Specific Sections
     toggleVisibility(commercial, selected === 'commercial');
     toggleVisibility(special, selected === 'special');
     
-    // 4. Show/Hide Common Sections
-    const contactSet = form.querySelector('fieldset:last-of-type'); // Contact Details
-    const actions = form.querySelector('.form-actions'); // Buttons
+    // Show remaining form parts (Contact info & Submit button)
+    const contactSet = form.querySelector('fieldset:last-of-type');
+    const actions = form.querySelector('.form-actions');
     
     if (selected) {
-      toggleVisibility(photosSection, true);
       toggleVisibility(contactSet, true);
       toggleVisibility(actions, true);
     } else {
-      toggleVisibility(photosSection, false);
       toggleVisibility(contactSet, false);
       toggleVisibility(actions, false);
     }
   };
 
-  // --- FILE VALIDATION (SIZE + QUANTITY) ---
-  if (fileInput) {
-    const MAX_BYTES = 90 * 1024 * 1024; // 90 MB Limit
-    const MAX_FILES = 10; // Quantity Limit
-
-    fileInput.addEventListener('change', function() {
-        // 1. Validate QUANTITY
-        if (this.files.length > MAX_FILES) {
-            alert(`⚠️ Too many files! You selected ${this.files.length} images.\n\nThe limit is ${MAX_FILES} images per submission.`);
-            this.value = ""; // Clear selection
-            return;
-        }
-
-        // 2. Validate SIZE
-        let totalSize = 0;
-        for (let i = 0; i < this.files.length; i++) {
-            totalSize += this.files[i].size;
-        }
-
-        if (totalSize > MAX_BYTES) {
-            const sizeInMB = (totalSize / (1024 * 1024)).toFixed(2);
-            alert(`⚠️ Total size too large! Your files total ${sizeInMB} MB.\n\nThe system accepts a maximum of 90 MB per submission.`);
-            this.value = ""; // Clear selection
-        }
-    });
-  }
-
   // --- AUTO-SCROLL EVENT ---
   radios.forEach(r => r.addEventListener('change', (e) => {
     updateUI();
+    // Small delay to allow DOM to update before scrolling
     setTimeout(() => {
         const selectedValue = e.target.value;
         const targetId = selectedValue === 'commercial' ? 'commercialFields' : 'specialFields';
@@ -213,27 +155,34 @@ document.addEventListener("DOMContentLoaded", () => {
         submitBtn.textContent = "Processing...";
     }
 
-    // 3. Capture Data
+    // 3. Capture Data (Using FormData for Binary/Image support)
+    // IMPORTANT: We do NOT use JSON.stringify here because we want to support file uploads.
     const formData = new FormData(form);
 
     try {
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
+        // Note: Do NOT set 'Content-Type': 'application/json' here.
+        // The browser automatically sets the correct multipart/form-data boundary for files.
         body: formData 
       });
 
       if (response.ok) {
+        // --- SUCCESS ---
         form.reset();
-        updateUI(); 
+        updateUI(); // Reset visibility logic
         
+        // A. Open Modal
         if (modal) modal.classList.add("active");
 
+        // B. Update text feedback
         if(formStatus) {
             formStatus.textContent = "Success!";
             formStatus.style.color = "green";
         }
         if(submitBtn) submitBtn.textContent = "Sent!";
         
+        // C. Restore button state
         setTimeout(() => {
             if(submitBtn) {
                 submitBtn.disabled = false;

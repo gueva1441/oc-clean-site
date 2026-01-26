@@ -14,12 +14,18 @@
 
 <body>
 	<header>
-		<nav aria-label="Primary">
+		<nav aria-label="Primary" style="display: flex; justify-content: space-between; align-items: center; position: relative;">
 			<a href="#top" class="logo">
 				<img src="assets/img/brand/logo.png" alt="OC Clean">
 			</a>
 
-			<ul>
+			<button class="mobile-toggle" aria-label="Menu">
+				<span></span>
+				<span></span>
+				<span></span>
+			</button>
+
+			<ul class="nav-menu">
 				<li><a href="#services">Services</a></li>
 				<li><a href="#why">Why OC Clean</a></li>
 				<li><a href="#how">How it works</a></li>
@@ -27,11 +33,8 @@
 				<li><a href="#estimate">Request a Free Quote</a></li>
 			</ul>
 
-			<a href="#estimate">Request a Free Quote</a>
+			<a href="#estimate" class="cta-button">Request a Free Quote</a>
 		</nav>
-
-
-
 
 		<div class="marquee marquee--xl" aria-label="Service highlights">
 			<div class="marquee__track">
@@ -54,10 +57,8 @@
 				<span class="mq-item" aria-hidden="true"><span class="mq-text">&#9733; COMMERCIAL SPACES</span></span>
 			</div>
 		</div>
-
-
-
 	</header>
+
 	<main id="top">
 		<section id="hero" aria-label="Hero">
 			<h1>Professional Cleaning Services Across Ontario</h1>
@@ -400,11 +401,16 @@
 								<option value="flexible">Flexible</option>
 							</select>
 						</div>
+					</div>
+				</fieldset>
 
-						<div class="form-field">
+				<fieldset id="photosFields" hidden>
+					<legend>Photos / Evidence (Optional)</legend>
+					<div class="form-grid">
+						<div class="form-field form-field--full">
 							<label for="photos">Photo upload (up to 10 images)</label>
 							<input id="photos" name="photos" type="file" accept="image/*" multiple />
-							<small class="form-help">You can select up to 10 images.</small>
+							<small class="form-help">You can select up to 10 images. Max 90 MB total.</small>
 							<small class="field-error" data-error-for="photos"></small>
 						</div>
 					</div>
@@ -428,7 +434,7 @@
 
 						<div class="form-field">
 							<label for="phone">Phone (optional)</label>
-							<input id="phone" name="phone" type="tel" autocomplete="tel" />
+							<input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="(555) 555-5555" maxlength="14" />
 						</div>
 
 						<div class="form-field">
@@ -456,6 +462,7 @@
 
 	<footer>
 		<p><strong>OC Clean</strong> — Commercial cleaning in Ontario, Canada.</p>
+		<p>📍 Based in North York, Serving the GTA & Beyond.</p>
 		<p>Hours: Mon–Fri, 9:00 AM – 5:00 PM • Emergency cleaning: 24/7</p>
 		<p>Fully insured.</p>
 		<p>Preferred contact method: email.</p>
@@ -469,7 +476,7 @@
 
 		<symbol id="i-office" viewBox="0 0 24 24">
 			<path d="M4 21V3h12v6h4v12H4zm2-2h8V5H6v14zm10 0h2V11h-2v8z"></path>
-			<path d="M7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"></path>
+			<path d="M7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm0 4h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"></path>
 		</symbol>
 
 		<symbol id="i-retail" viewBox="0 0 24 24">
@@ -506,6 +513,18 @@
   </div>
 </div>
 
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const phoneInput = document.getElementById('phone');
+		if(phoneInput) {
+			phoneInput.addEventListener('input', function (e) {
+				// 1. Quitar todo lo que no sea número
+				var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+				// 2. Formatear como (123) 456-7890
+				e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+			});
+		}
+	});
+</script>
 
 </html>
-

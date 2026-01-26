@@ -1,4 +1,4 @@
-/* style.css - OC Clean Masters (Versión FINAL "Bestia" - Mobile Fixed) */
+/* style.css - OC Clean Masters (Versión FINAL "Bestia" - Fixed & Mobile Ready) */
 
 /* --- 1. VARIABLES & RESET --- */
 :root {
@@ -29,8 +29,8 @@
 
 html { 
   scroll-behavior: smooth; 
-  scroll-padding-top: 180px; /* Colchón para que el menú no tape títulos */
-  overflow-x: hidden; /* Evita el bailoteo horizontal */
+  scroll-padding-top: 150px; /* Colchón para que el menú no tape títulos */
+  /* ELIMINADO: overflow-x: hidden; (Esto mataba el sticky header) */
 }
 
 body {
@@ -42,7 +42,7 @@ body {
   -webkit-font-smoothing: antialiased;
   width: 100%;
   position: relative;
-  overflow-x: hidden;
+  /* ELIMINADO: overflow-x: hidden; */
 }
 
 /* --- 2. TIPOGRAFÍA & GLOBALES --- */
@@ -79,14 +79,17 @@ a { color: inherit; text-decoration: none; transition: 0.2s; }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 
 
-/* --- 3. HEADER "BESTIA" (Menú Pro) --- */
+/* --- 3. HEADER & NAVEGACIÓN (Sticky + Mobile) --- */
 header {
-  position: sticky;
+  position: -webkit-sticky; /* Soporte Safari */
+  position: sticky;         /* El estándar que hace el "Freeze" */
   top: 0;
   z-index: 1000;
+  width: 100%;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 nav {
@@ -96,6 +99,7 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative; /* Necesario para el menú móvil absoluto */
 }
 
 nav .logo img {
@@ -105,18 +109,19 @@ nav .logo img {
   transition: all 0.3s ease;
 }
 
+/* Estilos Desktop del Menú */
 nav ul {
   display: flex;
-  gap: 50px;
+  gap: 40px;
   list-style: none;
   margin: 0;
   padding: 0;
+  align-items: center;
 }
 
-/* Estilos de enlaces del menú */
 nav ul a {
   font-weight: 900;
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: #0f172a;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -124,45 +129,113 @@ nav ul a {
   padding-bottom: 4px;
 }
 
-/* Línea Naranja debajo del menú (Desktop) */
-nav ul li a::after {
+/* Línea animada al pasar el mouse */
+nav ul a::after {
   content: "";
   position: absolute;
   width: 0%;
   height: 2px;
   bottom: 0;
   left: 0;
-  background-color: #ff6600; /* Naranja */
+  background-color: var(--primary);
   transition: width 0.3s ease-in-out;
 }
+nav ul a:hover::after { width: 100%; }
 
-nav ul a:hover::after { width: 100%; } /* Crece al pasar el mouse */
-nav ul a.active::after { width: 100%; }
+/* Botón Hamburguesa (Oculto en Desktop) */
+.mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1001;
+}
+.mobile-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--text-main);
+    margin: 5px 0;
+    transition: 0.3s;
+    border-radius: 3px;
+}
 
-/* Botón "Request Quote" DENTRO del menú (Estilo Azul Pro) */
-nav ul a[href="#estimate"] {
+/* Efecto de "X" cuando está abierto */
+.mobile-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+.mobile-toggle.open span:nth-child(2) { opacity: 0; }
+.mobile-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
+
+/* Botón CTA Desktop */
+nav .cta-button {
   color: var(--primary) !important;
   border: 2px solid var(--primary);
-  padding: 8px 24px;
+  padding: 10px 24px;
   border-radius: 50px;
+  font-weight: 700;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
-nav ul a[href="#estimate"]::after { display: none; } /* Sin línea naranja abajo */
-
-nav ul a[href="#estimate"]:hover {
+nav .cta-button:hover {
   background: var(--primary);
   color: white !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-/* Botón "Request Quote" AFUERA del menú (El fantasma) */
-/* Por defecto lo ocultamos en Desktop para no tener duplicados */
-nav > a[href="#estimate"]:not(.logo) {
-  display: none; 
-}
-
+/* === MODO MÓVIL (Menor a 900px) === */
 @media (max-width: 900px) {
-  nav ul { display: none; } /* Ocultar menú lista en tablet/móvil */
+  nav { padding: 10px 20px; }
+  
+  nav .logo img { height: 40px; } /* Logo más pequeño */
+  
+  /* Ocultamos botón Desktop */
+  nav .cta-button { display: none; }
+  
+  /* Mostramos Hamburguesa */
+  .mobile-toggle { display: block; order: 3; }
+
+  /* Menú desplegable */
+  nav ul {
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
+    position: absolute;
+    top: 100%; /* Justo debajo del header */
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 20px 0;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    border-top: 1px solid var(--border);
+    gap: 0;
+    text-align: center;
+  }
+  
+  /* Clase ACTIVA (controlada por JS) */
+  nav ul.active { display: flex; animation: slideDown 0.3s ease-out; }
+  
+  nav ul li { width: 100%; }
+  
+  nav ul a {
+    display: block;
+    padding: 15px 0;
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--bg-alt);
+  }
+  nav ul a::after { display: none; } /* Sin línea animada en móvil */
+  
+  /* Botón Request Quote en móvil (dentro de la lista) */
+  nav ul li:last-child a {
+    margin: 20px 20px 0;
+    background: var(--primary);
+    color: white !important;
+    border-radius: 12px;
+    border: none;
+  }
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 }
 
 
@@ -285,7 +358,6 @@ nav > a[href="#estimate"]:not(.logo) {
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.7); 
   backdrop-filter: blur(12px); 
-  -webkit-backdrop-filter: blur(12px); 
   border: 1px solid rgba(255, 255, 255, 0.6); 
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
   transition: 0.3s ease;
@@ -320,7 +392,6 @@ nav > a[href="#estimate"]:not(.logo) {
     width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; display: block;
 }
 
-/* Nota pequeña al pie de servicios */
 #services > p:last-child {
   background: rgba(255, 255, 255, 0.9); 
   padding: 10px 20px;
@@ -383,7 +454,6 @@ nav > a[href="#estimate"]:not(.logo) {
 #how li:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: var(--shadow-card); }
 #how li strong { display: block; color: var(--primary); font-size: 1.2rem; margin-bottom: 12px; }
 
-/* Frase "Preferred contact method" corregida */
 #how > p:last-child {
   background: #eff6ff; color: var(--primary); font-weight: 700;
   display: inline-block; padding: 8px 20px; border-radius: 50px;
@@ -391,7 +461,7 @@ nav > a[href="#estimate"]:not(.logo) {
 }
 
 
-/* --- 9. VIDEOS (Galería Pro) --- */
+/* --- 9. VIDEOS --- */
 #videos div[aria-label="Video placeholders"] {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;
 }
@@ -412,7 +482,7 @@ nav > a[href="#estimate"]:not(.logo) {
 #videos p { font-size: 0.9rem; margin: 0; z-index: 2; opacity: 0.8; }
 
 
-/* --- 10. ESTIMATE FORM (Modernizado) --- */
+/* --- 10. ESTIMATE FORM --- */
 #estimate { padding: 120px 24px; background: var(--bg-alt); }
 #estimateForm {
   background: white; padding: 48px; border-radius: 32px; box-shadow: var(--shadow-card);
@@ -438,7 +508,6 @@ nav > a[href="#estimate"]:not(.logo) {
 .choice-card-title { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
 .choice-card-sub { font-size: 0.95rem; color: var(--text-muted); line-height: 1.4; }
 
-/* Iconos del Formulario */
 .card-icon-wrapper {
   width: 60px; height: 60px; background: #eff6ff; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; margin-bottom: 15px; transition: 0.3s ease;
@@ -480,162 +549,25 @@ footer a { color: #cbd5e1; font-weight: 500; text-decoration: underline; }
 footer a:hover { color: white; }
 
 
-/* =========================================
-   === ZONA MÓVIL (LA MAGIA FINAL) ===
-   ========================================= */
-@media (max-width: 768px) {
-  
-  /* 1. Header: LOGO y BOTÓN en la misma línea */
-  header nav {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 10px 15px !important;
-    gap: 10px;
-  }
-  
-  .logo img {
-    height: 35px !important; /* Logo más pequeño */
-    width: auto;
-  }
-
-  /* RESUCITAMOS el botón exterior para el celular y lo estilizamos */
-  nav > a[href="#estimate"]:not(.logo) {
-    display: inline-block !important; /* ¡APARECE! */
-    font-size: 0.8rem !important;
-    padding: 8px 14px !important;
-    background: var(--primary) !important;
-    color: white !important;
-    border-radius: 50px;
-    border: none !important;
-    white-space: nowrap;
-    height: auto;
-  }
-  
-  /* Ocultamos la lista (por si acaso) */
-  nav ul { display: none; }
-
-
-  /* 2. Marquesina Flaca */
-  .marquee { padding: 4px 0 !important; }
-  .marquee .mq-text { font-size: 0.75rem !important; font-weight: 600; }
-
-
-  /* 3. Hero: Ajustes de texto y botones */
-  #hero { min-height: 60vh; padding-top: 110px; }
-  h1 { font-size: 2.5rem; line-height: 1.1; margin-bottom: 1.5rem; }
-  #hero p { font-size: 1.15rem; padding: 0 10px; }
-  
-  #hero div { flex-direction: column; width: 100%; padding: 0 20px; gap: 15px; }
-  #hero div a { width: 100%; text-align: center; font-size: 1rem; padding: 16px; }
-
-
-  /* 4. Formulario Compacto (Zoom Out) */
-  #estimateForm { padding: 24px; }
-  .choice-card { padding: 15px !important; }
-  .card-icon-wrapper { width: 45px !important; height: 45px !important; margin-bottom: 10px !important; }
-  .choice-card-title { font-size: 1rem !important; }
-  
-  /* 5. Servicios (Imágenes más bajas) */
-  .card-img-top { height: 160px; }
-  #services article { padding: 25px; }
-}
-
-
-/* --- CORRECCIÓN DE ATERRIZAJE (SCROLL PERFECTO) --- */
-
-/* Esto crea un "colchón invisible" encima de cada sección */
-/* Así el menú nunca tapa el título al llegar */
-
-#services, 
-#why, 
-#how, 
-#videos, 
-#estimate {
-    /* EN COMPUTADORA: Dejamos 150px de aire arriba */
-    scroll-margin-top: 150px; 
-}
-
-/* EN CELULAR: Ajuste milimétrico */
-@media (max-width: 768px) {
-    #services, 
-    #why, 
-    #how, 
-    #videos, 
-    #estimate {
-        /* Dejamos 80px (lo que mide el header + un poquito de aire) */
-        scroll-margin-top: 80px; 
-    }
-}
-
-/* --- ESTILOS DEL MODAL PERSONALIZADO --- */
+/* --- 12. MODAL & EXTRAS --- */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6); /* Fondo oscuro transparente */
-  backdrop-filter: blur(4px); /* Efecto borroso elegante */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.3s ease;
 }
-
-.modal-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
+.modal-overlay.active { opacity: 1; visibility: visible; }
 .modal-box {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  text-align: center;
-  max-width: 400px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  transform: translateY(20px);
-  transition: transform 0.3s ease;
+  background: white; padding: 30px; border-radius: 12px; text-align: center;
+  max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  transform: translateY(20px); transition: transform 0.3s ease;
 }
-
-.modal-overlay.active .modal-box {
-  transform: translateY(0);
-}
-
-.modal-icon {
-  font-size: 40px;
-  margin-bottom: 15px;
-}
-
-.modal-box h3 {
-  color: #1e40af; /* Tu azul corporativo */
-  margin: 0 0 10px 0;
-  font-size: 24px;
-}
-
-.modal-box p {
-  color: #4b5563;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
+.modal-overlay.active .modal-box { transform: translateY(0); }
+.modal-icon { font-size: 40px; margin-bottom: 15px; }
+.modal-box h3 { color: #1e40af; margin: 0 0 10px 0; font-size: 24px; }
+.modal-box p { color: #4b5563; margin-bottom: 20px; line-height: 1.5; }
 .modal-box button {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
+  background: #2563eb; color: white; border: none; padding: 10px 24px;
+  border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;
 }
-
-.modal-box button:hover {
-  background: #1e40af;
-}
-
-
+.modal-box button:hover { background: #1e40af; }
