@@ -1,4 +1,4 @@
-/* style.css - OC Clean Masters (Versión FINAL v5.0 - Logo Grande & Alineado) */
+/* style.css - OC Clean Masters (Versión FINAL v6.0 - Alineación Militar) */
 
 /* --- 1. VARIABLES & RESET --- */
 :root {
@@ -77,14 +77,14 @@ a { color: inherit; text-decoration: none; transition: 0.2s; }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 
 
-/* --- 3. HEADER & NAVEGACIÓN (Sticky + Mobile) --- */
+/* --- 3. HEADER & NAVEGACIÓN (Sticky + Desktop) --- */
 header {
   position: -webkit-sticky; 
   position: sticky;         
   top: 0;
   z-index: 1000;
   width: 100%;
-  background: rgba(255, 255, 255, 0.98); /* Un poco más opaco para leer mejor */
+  background: rgba(255, 255, 255, 0.98); 
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -148,19 +148,6 @@ nav ul a:hover::after { width: 100%; }
     padding: 10px;
     z-index: 1001;
 }
-.mobile-toggle span {
-    display: block;
-    width: 28px; /* Un poco más anchas las líneas */
-    height: 3px;
-    background-color: var(--text-main);
-    margin: 5px 0;
-    transition: 0.3s;
-    border-radius: 3px;
-}
-
-.mobile-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
-.mobile-toggle.open span:nth-child(2) { opacity: 0; }
-.mobile-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
 
 /* Botón CTA Desktop */
 nav .cta-button {
@@ -180,42 +167,48 @@ nav .cta-button:hover {
 
 
 /* =========================================
-   === ZONA MÓVIL REFORZADA (Alineación Perfecta) ===
+   === ZONA MÓVIL BLINDADA (v6.0) ===
    ========================================= */
 @media (max-width: 900px) {
   
-  /* 1. LAYOUT FLEXIBLE: LOGO ------ BOTON HAMBURGUESA */
+  /* 1. CONTENEDOR FLEX (Sin Grid para evitar saltos) */
   nav {
-    display: grid !important;
-    /* Col 1: Logo, Col 2: Espacio Flexible, Col 3: Botón + Hamburguesa */
-    grid-template-columns: auto 1fr auto; 
-    align-items: center !important; /* CENTRADO VERTICAL CLAVE 🎯 */
+    display: flex !important;
+    align-items: center !important; /* Eje Vertical: CENTRO */
+    justify-content: space-between; /* Eje Horizontal: Esparcido */
     padding: 12px 20px !important;
-    gap: 15px;
     height: auto;
+    position: relative;
   }
   
-  /* 2. LOGO: ¡AHORA SÍ GRANDE! */
+  /* 2. LOGO (Orden 1 - Izquierda) */
+  nav .logo {
+    order: 1;
+    margin-right: 0; /* Empuja todo lo demás a la derecha */
+    display: flex;
+    align-items: center;
+  }
+  
   .logo img {
-    height: 50px !important; /* Aumentado de 32px a 50px */
+    height: 42px !important; /* Tamaño balanceado */
     width: auto;
     object-fit: contain;
   }
 
-  /* 3. BOTÓN "GET QUOTE" */
+  /* 3. BOTÓN "GET QUOTE" (Orden 2 - Medio/Derecha) */
   nav .cta-button {
+    order: 2; /* Obligamos a que vaya SEGUNDO */
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
     
-    grid-column: 2; /* En medio */
-    justify-self: end; /* Pegado a la derecha */
-    margin-right: 10px; /* Separación con la hamburguesa */
+    margin: 0 15px 0 0 !important; /* Espacio a la derecha */
     
-    font-size: 0.8rem !important;
+    font-size: 0.85rem !important;
     font-weight: 700;
-    padding: 10px 18px !important; /* Botón más "gordito" */
-    height: auto;
+    padding: 10px 18px !important;
+    height: 40px; /* Altura fija para alineación */
+    white-space: nowrap;
     
     background: var(--primary);
     color: white !important;
@@ -224,14 +217,36 @@ nav .cta-button:hover {
     box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
   }
 
-  /* 4. HAMBURGUESA */
+  /* 4. HAMBURGUESA (Orden 3 - Derecha Extrema) */
   .mobile-toggle {
-    display: block;
-    grid-column: 3;
-    padding: 0;
+    order: 3; /* Obligamos a que vaya AL FINAL */
+    display: flex; 
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    padding: 5px; 
     margin: 0;
+    height: 40px; 
+    width: 30px;
+    background: transparent;
   }
   
+  .mobile-toggle span {
+    width: 26px;
+    height: 3px;
+    background-color: var(--text-main);
+    margin: 3px 0; /* Espaciado entre rayitas */
+    border-radius: 3px;
+    transition: 0.3s;
+    display: block;
+  }
+
+  /* Efecto X al abrir */
+  .mobile-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+  .mobile-toggle.open span:nth-child(2) { opacity: 0; }
+  .mobile-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
+
   /* MENÚ DESPLEGABLE */
   nav ul {
     display: none;
@@ -247,7 +262,7 @@ nav .cta-button:hover {
     z-index: 999;
   }
   
-  nav ul li:last-child { display: none; } /* Ocultar botón duplicado */
+  nav ul li:last-child { display: none; } 
   
   nav ul.active { display: flex; animation: slideDown 0.3s ease-out; }
   
@@ -265,7 +280,7 @@ nav .cta-button:hover {
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Extras de Móvil */
+  /* Ajustes Visuales Mobile */
   input[type="file"]::file-selector-button {
     background: #eff6ff;
     color: var(--primary);
