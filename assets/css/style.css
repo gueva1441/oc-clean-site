@@ -496,6 +496,24 @@ button[type="submit"]:hover {
 }
 #formStatus { text-align: center; font-weight: 700; margin-top: 10px; }
 
+/* Form step title, helper text and validation errors */
+.form-step-title {
+  font-size: 1.25rem; font-weight: 800; color: var(--text-main);
+  margin: 0 0 20px 0; padding-bottom: 10px; border-bottom: 2px solid var(--bg-alt);
+}
+.form-help {
+  display: block; margin-top: 6px;
+  font-size: 0.85rem; line-height: 1.4; color: var(--text-muted);
+}
+.field-error {
+  display: block; margin-top: 6px;
+  font-size: 0.85rem; font-weight: 600; color: #dc2626;
+}
+.field-error:empty { display: none; }
+input.has-error, select.has-error, textarea.has-error {
+  border-color: #dc2626; box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+}
+
 
 /* --- 11. FOOTER --- */
 footer { background: #0f172a; color: white; padding: 80px 24px; }
