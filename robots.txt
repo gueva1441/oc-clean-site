@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://oc.northmasters.ca/sitemap.xml
