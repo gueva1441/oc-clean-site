@@ -448,7 +448,9 @@
 
 						<div class="form-field">
 							<label for="email">Email <span aria-hidden="true">*</span></label>
-							<input id="email" name="email" type="email" autocomplete="email" required />
+							<input id="email" name="email" type="email" autocomplete="email" required
+								pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+								title="Ingresá un email válido, ej: nombre@dominio.com" />
 							<small class="field-error" data-error-for="email"></small>
 						</div>
 

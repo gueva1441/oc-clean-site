@@ -12,8 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add("is-visible");
-        observer.unobserve(entry.target);
+        const el = entry.target;
+        // Stagger solo para los service cards (100ms entre cada uno)
+        const delay = parseInt(el.dataset.stagger || "0", 10);
+        setTimeout(() => el.classList.add("is-visible"), delay);
+        observer.unobserve(el);
       }
     });
   }, options);
@@ -25,6 +28,11 @@ document.addEventListener("DOMContentLoaded", () => {
   animatedElements.forEach((el) => {
     el.classList.add("reveal");
     observer.observe(el);
+  });
+
+  // Entrada escalonada (stagger) para los service cards
+  document.querySelectorAll("#services article").forEach((card, i) => {
+    card.dataset.stagger = i * 100;
   });
 });
 

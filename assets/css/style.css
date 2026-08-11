@@ -299,9 +299,9 @@ nav .cta-button:hover {
 .marquee {
   width: 100%;
   z-index: 500;
-  background: #ffffff;
-  border-top: 1px solid #cbd5e1;
-  border-bottom: 1px solid #cbd5e1;
+  background: #0f172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 10px 0;
   overflow: hidden;
   position: relative;
@@ -309,13 +309,15 @@ nav .cta-button:hover {
 }
 .marquee__track {
   display: flex; gap: 60px; animation: scroll 35s linear infinite; width: max-content;
+  transition: opacity 0.4s ease;
 }
+.marquee:hover .marquee__track { animation-play-state: paused; opacity: 0.85; }
 .mq-item {
-  color: var(--primary); font-size: 0.85rem; font-weight: 800;
+  color: #ffffff; font-size: 0.85rem; font-weight: 800;
   letter-spacing: 0.1em; text-transform: uppercase;
   display: flex; align-items: center; gap: 12px;
 }
-.mq-text { color: var(--primary); }
+.mq-text { color: #ffffff; }
 @keyframes scroll { to { transform: translateX(-50%); } }
 
 
@@ -357,14 +359,15 @@ nav .cta-button:hover {
 #services { padding: 120px 24px; background: var(--bg); position: relative; overflow: hidden; }
 #services article {
   padding: 40px; border-radius: 24px;
-  background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); 
-  border: 1px solid rgba(255, 255, 255, 0.6); 
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
-  transition: 0.3s ease; margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease, background 0.4s ease;
+  margin-bottom: 20px; overflow: hidden;
 }
 #services article:hover {
-  background: rgba(255, 255, 255, 0.9); border-color: var(--primary);
-  transform: translateY(-8px); box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95); border-color: var(--primary);
+  transform: translateY(-8px); box-shadow: 0 24px 48px -8px rgba(31, 38, 135, 0.28);
 }
 @media (min-width: 768px) {
     #services {
@@ -376,7 +379,8 @@ nav .cta-button:hover {
 }
 .service-title { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; font-size: 1.5rem; }
 .icon { width: 48px; height: 48px; flex-shrink: 0; fill: var(--primary); }
-.card-img-top { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; display: block; }
+.card-img-top { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; display: block; transition: transform 0.4s ease; }
+#services article:hover .card-img-top { transform: scale(1.05); }
 #services > p:last-child {
   background: rgba(255, 255, 255, 0.9); padding: 10px 20px; border-radius: 50px; 
   display: inline-block; font-weight: 600; font-size: 0.95rem !important; 
@@ -484,6 +488,14 @@ input:not([type="radio"]), select, textarea {
 }
 input:focus, select:focus, textarea:focus {
   outline: none; background: white; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+/* Feedback de validez: borde verde sutil al perder foco con contenido valido */
+#estimateForm input:required:valid:not(:focus),
+#estimateForm textarea:required:valid:not(:focus),
+#estimateForm select:required:valid:not(:focus),
+#estimateForm input[placeholder]:not([type="radio"]):not([type="file"]):valid:not(:placeholder-shown):not(:focus) {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
 }
 button[type="submit"] {
   width: 100%; padding: 20px; margin-top: 32px;
