@@ -145,7 +145,8 @@
 <script>
 // URL /exec del Task Portal
 const API = "https://script.google.com/macros/s/AKfycbye8a8dAv-ZyQcjfJcJRwaRBWN5Pwqnrq0E4OnfSwl6uVntjuN9jHaYXro-If_mXgtP/exec";
-const PARALLEL = 3;     // fotos pidiéndose al mismo tiempo
+const PARALLEL = 4;     // viajes al mismo tiempo
+const BATCH    = 3;     // fotos por viaje
 const TRIES    = 6;     // reintentos si Google está ocupado
 const PDFLIB = "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
 const JSZIP  = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
@@ -281,32 +282,74 @@ function sendSpeedLog() {
         { credentials: "omit", redirect: "follow", cache: "no-store" }).catch(() => {});
 }
 
+function showPhoto(i, mime, data) {
+  const el = document.getElementById("ph" + i);
+  srcs[i] = "data:" + mime + ";base64," + data;
+  el.className = "ph" + (selected.has(i) ? " sel" : "");
+  el.onclick = null;
+  el.innerHTML = '<img alt="Photo ' + (i + 1) + '"><span class="n">' + (i + 1) + '</span><span class="ck" role="checkbox" aria-label="Select photo ' + (i + 1) + '">' + ICON_CK + '</span>';
+  const img = el.querySelector("img");
+  img.onload = () => img.classList.add("in");
+  img.src = srcs[i];
+  img.onclick = e => onTile(e, i, false);
+  el.querySelector(".ck").onclick = e => { e.stopPropagation(); onTile(e, i, true); };
+  loadedCount++;
+  setProgress();
+}
+
+// Una foto sola (respaldo y botón de reintentar)
 async function loadOne(i) {
   const el = document.getElementById("ph" + i);
   el.className = "ph wait sk"; el.innerHTML = ""; el.onclick = null;
   try {
     const j = await getJSON({ api: "photo", id: photos[i].id, s: photos[i].s });
-    srcs[i] = "data:" + j.mime + ";base64," + j.data;
-    el.className = "ph" + (selected.has(i) ? " sel" : "");
-    el.innerHTML = '<img alt="Photo ' + (i + 1) + '"><span class="n">' + (i + 1) + '</span><span class="ck" role="checkbox" aria-label="Select photo ' + (i + 1) + '">' + ICON_CK + '</span>';
-    const img = el.querySelector("img");
-    img.onload = () => img.classList.add("in");
-    img.src = srcs[i];
-    img.onclick = e => onTile(e, i, false);
-    el.querySelector(".ck").onclick = e => { e.stopPropagation(); onTile(e, i, true); };
-    loadedCount++;
+    showPhoto(i, j.mime, j.data);
   } catch (e) {
     el.className = "ph fail";
     el.textContent = "Photo " + (i + 1) + " didn't load — tap to retry";
     el.onclick = () => loadAll([i]);
+    setProgress();
   }
-  setProgress();
+}
+
+// Varias fotos en un viaje. Si el script viejo no lo entiende, cae a 1 por 1.
+let batchOK = true, batchFails = 0, batchWorked = false;
+async function loadBatch(list) {
+  if (!batchOK || list.length === 1) { for (const i of list) await loadOne(i); return; }
+  const url = API + "?" + new URLSearchParams({
+    api: "photos", ids: list.map(i => photos[i].id).join(","), ss: list.map(i => photos[i].s).join(",")
+  }).toString();
+  const t = performance.now();
+  for (let a = 0; a < 3; a++) {
+    try {
+      const r = await fetch(url, { credentials: "omit", redirect: "follow", cache: "no-store" });
+      const j = await r.json();
+      if (j.ok && Array.isArray(j.items)) {
+        batchWorked = true;
+        const ms = performance.now() - t, missing = [];
+        j.items.forEach((it, n) => {
+          const i = list[n];
+          if (it && it.data) {
+            showPhoto(i, it.mime, it.data);
+            stats.phB.push(ms / 1000); stats.phG.push((j.ms || 0) / 1000); if (it.kb) stats.kb.push(it.kb);
+          } else missing.push(i);
+        });
+        stats.retries += a;
+        for (const i of missing) await loadOne(i);
+        return;
+      }
+    } catch (e) {}
+    if (!batchWorked && ++batchFails >= 2) { batchOK = false; break; }   // script viejo
+    await sleep(700 * (a + 1) + Math.random() * 500);
+  }
+  for (const i of list) await loadOne(i);
 }
 
 async function loadAll(list) {
-  const queue = list.slice();
-  const worker = async () => { while (queue.length) await loadOne(queue.shift()); };
-  await Promise.all(Array.from({ length: Math.min(PARALLEL, queue.length) }, worker));
+  const chunks = [];
+  for (let n = 0; n < list.length; n += BATCH) chunks.push(list.slice(n, n + BATCH));
+  const worker = async () => { while (chunks.length) await loadBatch(chunks.shift()); };
+  await Promise.all(Array.from({ length: Math.min(PARALLEL, chunks.length) }, worker));
 }
 
 // ---------------- selección (como en la compu: Shift = rango, Ctrl = una) ----------------
