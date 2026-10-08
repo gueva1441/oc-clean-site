@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Service Report · OC Clean Masters</title>
+<style>
+  :root{--ink:#1a202c;--muted:#718096;--line:#e2e8f0;--blue:#3182ce;--bg:#f4f7f6}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+  header{background:var(--ink);color:#fff}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+  header .wrap{padding:20px 16px}
+  .brand{font-size:19px;font-weight:700;letter-spacing:1px}
+  .sub{color:#a0aec0;font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+  .card{background:#fff;border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:6px;padding:16px 18px;margin:18px 0}
+  .meta{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.3px}
+  .desc{font-size:18px;font-weight:700;margin-top:6px;line-height:1.4;white-space:pre-wrap}
+  .bar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;font-size:14px;color:var(--muted);margin:0 0 10px}
+  .bar span:first-child{white-space:nowrap;font-weight:700;color:var(--ink)}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:start;padding-bottom:30px}
+  @media (max-width:860px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:520px){.grid{grid-template-columns:minmax(0,1fr)}}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:6px;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .btn[disabled]{opacity:.7;cursor:wait}
+  .ph{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;position:relative}
+  .ph.wait{aspect-ratio:4/3;background:linear-gradient(90deg,#edf2f7 25%,#f7fafc 50%,#edf2f7 75%);background-size:200% 100%;animation:sh 1.2s infinite}
+  @keyframes sh{to{background-position:-200% 0}}
+  .ph img{display:block;width:100%;height:auto;cursor:zoom-in}
+  .ph .n{position:absolute;left:8px;top:8px;background:rgba(26,32,44,.75);color:#fff;font-size:12px;padding:2px 7px;border-radius:4px}
+  .ph.fail{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;cursor:pointer}
+  .msg{text-align:center;padding:60px 16px;color:var(--muted);font-size:16px}
+  footer{text-align:center;font-size:12px;color:#a0aec0;padding:18px 16px;border-top:1px solid var(--line);background:#f7fafc}
+  #lb{display:none;position:fixed;inset:0;background:rgba(10,12,16,.95);z-index:9;align-items:center;justify-content:center}
+  #lb.on{display:flex}
+  #lb img{max-width:100%;max-height:100%;object-fit:contain}
+  #lb button,#lb a{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:6px;font-size:15px;padding:10px 14px;cursor:pointer;text-decoration:none}
+  #lbX{top:12px;right:12px} #lbP{left:12px;top:50%} #lbN{right:12px;top:50%}
+  #lbC{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);color:#cbd5e0;font-size:13px}
+  #lbD{bottom:10px;right:12px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand">OC CLEAN MASTERS</div>
+  <div class="sub">Service Completion Report</div>
+</div></header>
+
+<main class="wrap" id="app"><div class="msg">Loading report…</div></main>
+
+<footer>&copy; <span id="yr"></span> NorthMasters Commercial Cleaning Services &bull; Ontario, Canada</footer>
+
+<div id="lb" role="dialog" aria-label="Photo viewer">
+  <img id="lbI" alt="">
+  <button id="lbX" aria-label="Close">✕</button>
+  <button id="lbP" aria-label="Previous">‹</button>
+  <button id="lbN" aria-label="Next">›</button>
+  <a id="lbD" download>Download</a>
+  <div id="lbC"></div>
+</div>
+
+<script>
+// ↓↓↓ PEGÁ AQUÍ la URL /exec de tu Task Portal (la misma de WEB_APP_URL) ↓↓↓
+const API = "https://script.google.com/macros/s/AKfycbye8a8dAv-ZyQcjfJcJRwaRBWN5Pwqnrq0E4OnfSwl6uVntjuN9jHaYXro-If_mXgtP/exec";
+// ↑↑↑ ---------------------------------------------------------------- ↑↑↑
+
+const PARALLEL = 3;          // fotos pidiéndose al mismo tiempo
+const TRIES    = 6;          // reintentos si Google está ocupado
+
+const $ = s => document.querySelector(s);
+const app = $("#app");
+document.getElementById("yr").textContent = new Date().getFullYear();
+const qs = new URLSearchParams(location.search);
+const T = qs.get("t") || "", K = qs.get("k") || "";
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Pide JSON al script SIN cookies de Google (así no importa cuántas cuentas tenga abiertas)
+async function getJSON(params) {
+  const url = API + "?" + new URLSearchParams(params).toString();
+  let last = "server";
+  for (let i = 0; i < TRIES; i++) {
+    try {
+      const r = await fetch(url, { credentials: "omit", redirect: "follow", cache: "no-store" });
+      const j = await r.json();
+      if (j.ok) return j;
+      if (j.error === "invalid" || j.error === "not_found") throw Object.assign(new Error(j.error), { final: true });
+      last = j.error || "server";
+    } catch (e) {
+      if (e.final) throw e;
+      last = "network";
+    }
+    await sleep(800 * (i + 1) + Math.random() * 600);   // Google ocupado → esperar y reintentar
+  }
+  throw new Error(last);
+}
+
+let report = null, photos = [], srcs = [], loading = Promise.resolve();
+
+function render(d) {
+  document.title = "Service Report " + d.reference + " · OC Clean Masters";
+  app.innerHTML =
+    '<div class="card"><div class="meta">Workorder: ' + esc(d.reference) + (d.date ? " · " + esc(d.date) : "") + '</div>' +
+    '<div class="desc">' + esc(d.description) + '</div></div>' +
+    '<div class="bar"><span id="cnt">' + d.photos.length + ' photo' + (d.photos.length === 1 ? "" : "s") + '</span>' +
+    (d.videos ? '<span>+ ' + d.videos + ' video(s) on file — reply to our email to receive them</span>' : '') +
+    (d.photos.length ? '<button class="btn" id="pdfBtn">Download PDF</button>' : '') + '</div>' +
+    (d.photos.length ? '<div class="grid" id="grid"></div>' : '<div class="msg">No photos found for this workorder.</div>');
+  const grid = $("#grid");
+  if (!grid) return;
+  report = d;
+  photos = d.photos;
+  srcs = new Array(photos.length);
+  $("#pdfBtn").onclick = downloadPdf;
+  photos.forEach((p, i) => {
+    const el = document.createElement("div");
+    el.className = "ph wait"; el.id = "ph" + i;
+    grid.appendChild(el);
+  });
+  loading = loadAll(photos.map((_, i) => i));
+}
+
+async function loadOne(i) {
+  const el = document.getElementById("ph" + i);
+  el.className = "ph wait"; el.innerHTML = ""; el.onclick = null;
+  try {
+    const j = await getJSON({ api: "photo", id: photos[i].id, s: photos[i].s });
+    srcs[i] = "data:" + j.mime + ";base64," + j.data;
+    el.className = "ph";
+    el.innerHTML = '<img alt="Photo ' + (i + 1) + '"><span class="n">' + (i + 1) + '</span>';
+    const img = el.querySelector("img");
+    img.src = srcs[i];
+    img.onclick = () => openLB(i);
+  } catch (e) {
+    el.className = "ph fail";
+    el.textContent = "Photo " + (i + 1) + " didn't load — tap to retry";
+    el.onclick = () => loadAll([i]);
+  }
+}
+
+async function loadAll(list) {
+  const queue = list.slice();
+  const worker = async () => { while (queue.length) await loadOne(queue.shift()); };
+  await Promise.all(Array.from({ length: Math.min(PARALLEL, queue.length) }, worker));
+}
+
+// ---------- PDF: portada + 1 foto por página, cada foto tal cual se subió ----------
+const PDFLIB = "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
+function loadScript(src) {
+  return new Promise((ok, bad) => {
+    if (window.PDFLib) return ok();
+    const sc = document.createElement("script");
+    sc.src = src; sc.onload = ok; sc.onerror = bad;
+    document.head.appendChild(sc);
+  });
+}
+const pdfText = s => String(s == null ? "" : s).replace(/[\r\n\t]+/g, " ").replace(/[^\x20-\x7E\xA0-\xFF]/g, "").trim();
+function wrap(text, font, size, max) {
+  const out = []; let line = "";
+  pdfText(text).split(/\s+/).filter(Boolean).forEach(w => {
+    const t = line ? line + " " + w : w;
+    if (font.widthOfTextAtSize(t, size) <= max) line = t; else { if (line) out.push(line); line = w; }
+  });
+  if (line) out.push(line);
+  return out;
+}
+const b64bytes = b64 => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+
+async function downloadPdf() {
+  const btn = $("#pdfBtn");
+  const label = t => { btn.textContent = t; };
+  btn.disabled = true;
+  try {
+    label("Loading photos…");
+    await loading;
+    const missing = photos.map((_, i) => i).filter(i => !srcs[i]);
+    if (missing.length) await loadAll(missing);
+
+    label("Preparing PDF…");
+    await loadScript(PDFLIB);
+    const L = window.PDFLib;
+    const doc = await L.PDFDocument.create();
+    const bold = await doc.embedFont(L.StandardFonts.HelveticaBold);
+    const reg  = await doc.embedFont(L.StandardFonts.Helvetica);
+    const ink = L.rgb(0.10, 0.13, 0.17), gray = L.rgb(0.44, 0.50, 0.59), blue = L.rgb(0.19, 0.51, 0.81);
+    const n = photos.length, ref = report.reference;
+    doc.setTitle("Service Report - " + pdfText(ref));
+    doc.setAuthor("OC Clean Masters");
+
+    const c = doc.addPage([612, 792]);
+    c.drawRectangle({ x: 0, y: 692, width: 612, height: 100, color: ink });
+    c.drawText("OC CLEAN MASTERS", { x: 48, y: 742, size: 22, font: bold, color: L.rgb(1, 1, 1) });
+    c.drawText("SERVICE COMPLETION REPORT", { x: 48, y: 718, size: 11, font: reg, color: L.rgb(0.63, 0.68, 0.75) });
+    let y = 618;
+    c.drawText(pdfText("WORKORDER: " + ref).toUpperCase(), { x: 66, y, size: 11, font: bold, color: gray });
+    y -= 18;
+    if (report.date) { c.drawText(pdfText(report.date), { x: 66, y, size: 11, font: reg, color: gray }); y -= 26; } else y -= 8;
+    wrap(report.description, bold, 16, 490).slice(0, 7).forEach(l => { c.drawText(l, { x: 66, y, size: 16, font: bold, color: ink }); y -= 21; });
+    c.drawRectangle({ x: 48, y: y + 10, width: 5, height: 632 - (y + 10), color: blue });
+    y -= 20;
+    c.drawText(n + " photo" + (n === 1 ? "" : "s"), { x: 48, y, size: 12, font: reg, color: ink });
+    if (report.videos) c.drawText("+ " + report.videos + " video(s) on file. Reply to our email to receive them.", { x: 48, y: y - 20, size: 10, font: reg, color: gray });
+    c.drawText("NorthMasters Commercial Cleaning Services  ·  Ontario, Canada", { x: 48, y: 40, size: 9, font: reg, color: gray });
+
+    for (let i = 0; i < n; i++) {
+      if (!srcs[i]) continue;
+      label("Preparing PDF… " + (i + 1) + "/" + n);
+      const [head, b64] = srcs[i].split(",");
+      const bytes = b64bytes(b64);
+      let img;
+      try { img = head.indexOf("image/png") > -1 ? await doc.embedPng(bytes) : await doc.embedJpg(bytes); }
+      catch (e) { continue; }   // formato raro (webp/gif): se salta
+      const STRIP = 28;
+      const pg = doc.addPage([img.width, img.height + STRIP]);
+      pg.drawImage(img, { x: 0, y: STRIP, width: img.width, height: img.height });
+      pg.drawText(pdfText("Workorder " + ref + "  ·  Photo " + (i + 1) + " of " + n), { x: 10, y: 9, size: 10, font: reg, color: gray });
+    }
+
+    const blob = new Blob([await doc.save()], { type: "application/pdf" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "Service Report - " + (String(ref).replace(/[^\w\- ]+/g, "").trim() || "OC Clean") + ".pdf";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    label("Download PDF");
+  } catch (e) {
+    label("Couldn't create the PDF — tap to retry");
+  }
+  btn.disabled = false;
+}
+
+// Visor grande
+let cur = 0;
+const lb = $("#lb");
+function openLB(i) { cur = i; showLB(); lb.classList.add("on"); }
+function showLB() {
+  let i = cur, tries = 0;
+  while (!srcs[i] && tries++ < photos.length) i = (i + 1) % photos.length;
+  cur = i;
+  $("#lbI").src = srcs[cur] || "";
+  $("#lbC").textContent = (cur + 1) + " / " + photos.length;
+  const a = $("#lbD"); a.href = srcs[cur] || "#"; a.download = "photo-" + (cur + 1) + ".jpg";
+}
+function step(d) {
+  for (let k = 1; k <= photos.length; k++) {
+    const i = (cur + d * k + photos.length * k) % photos.length;
+    if (srcs[i]) { cur = i; return showLB(); }
+  }
+}
+$("#lbX").onclick = () => lb.classList.remove("on");
+$("#lbP").onclick = e => { e.stopPropagation(); step(-1); };
+$("#lbN").onclick = e => { e.stopPropagation(); step(1); };
+lb.onclick = e => { if (e.target === lb) lb.classList.remove("on"); };
+document.addEventListener("keydown", e => {
+  if (!lb.classList.contains("on")) return;
+  if (e.key === "Escape") lb.classList.remove("on");
+  if (e.key === "ArrowLeft") step(-1);
+  if (e.key === "ArrowRight") step(1);
+});
+let x0 = null;
+lb.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+lb.addEventListener("touchend", e => {
+  if (x0 === null) return;
+  const dx = e.changedTouches[0].clientX - x0; x0 = null;
+  if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
+});
+
+(async () => {
+  if (!T || !K) { app.innerHTML = '<div class="msg">This link is incomplete. Please use the button in our email.</div>'; return; }
+  try {
+    render(await getJSON({ api: "report", task_id: T, k: K }));
+  } catch (e) {
+    app.innerHTML = '<div class="msg">' + (e.message === "invalid"
+      ? "This link is not valid. Please use the button in our email."
+      : "We couldn't load this report right now. Please try again in a minute, or reply to our email.") + '</div>';
+  }
+})();
+</script>
+</body>
+</html>
