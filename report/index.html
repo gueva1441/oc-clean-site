@@ -186,7 +186,6 @@ function render(d) {
   report = d; photos = d.photos; srcs = new Array(photos.length);
   document.title = "Service Report " + d.reference + " · OC Clean Masters";
   const chips = [
-    d.completed ? "Completed " + esc(d.completed) : "",
     plural(photos.length, "photo"),
     d.videos ? plural(d.videos, "video") + " on file" : ""
   ].filter(Boolean).map(c => '<span class="chip">' + c + '</span>').join("");
@@ -209,7 +208,7 @@ function render(d) {
     '<div class="tl"><span class="count" id="cnt"></span>' +
       '<button class="link" id="selAll">Select all</button>' +
       '<button class="link" id="selNone" style="display:none">Clear</button>' +
-      '<span id="hint" style="font-size:13px">Tip: Shift + click selects a range</span></div>' +
+      '<span id="hint" style="font-size:13px">Tip: Ctrl + click selects photos · Shift + click selects a range</span></div>' +
     '<div class="tr">' +
       '<button class="btn btn-nv" id="zipBtn">' + ICON_DL + '<span>Download photos</span></button>' +
       '<button class="btn btn-or" id="pdfBtn">' + ICON_PDF + '<span>Download PDF</span></button>' +
@@ -264,7 +263,9 @@ async function loadAll(list) {
 // ---------------- selección (como en la compu: Shift = rango, Ctrl = una) ----------------
 function onTile(e, i, fromCheck) {
   const selMode = selected.size > 0;
-  if (e.shiftKey && anchor !== null) {
+  if (e.shiftKey && anchor === null) {
+    selected.add(i); anchor = i;
+  } else if (e.shiftKey) {
     const [a, b] = [Math.min(anchor, i), Math.max(anchor, i)];
     for (let k = a; k <= b; k++) selected.add(k);
   } else if (fromCheck || e.ctrlKey || e.metaKey || selMode) {
@@ -381,7 +382,6 @@ function downloadPdf() {
     c.drawRectangle({ x: 48, y: y + 10, width: 5, height: 632 - (y + 10), color: orange });
     y -= 20;
     c.drawText(list.length === total ? plural(total, "photo") : list.length + " of " + total + " photos", { x: 48, y, size: 12, font: reg, color: navy });
-    if (report.completed) c.drawText("Completed " + pdfText(report.completed), { x: 48, y: y - 18, size: 11, font: reg, color: gray });
     c.drawText("OC Clean Masters  ·  705-690-7272  ·  oc.northmasters.ca", { x: 48, y: 40, size: 9, font: reg, color: gray });
 
     let k = 0;
@@ -392,10 +392,14 @@ function downloadPdf() {
       let img;
       try { img = head.indexOf("image/png") > -1 ? await doc.embedPng(bytes) : await doc.embedJpg(bytes); }
       catch (e) { continue; }   // formato raro (webp/gif): se salta
-      const STRIP = 28;
-      const pg = doc.addPage([img.width, img.height + STRIP]);
-      pg.drawImage(img, { x: 0, y: STRIP, width: img.width, height: img.height });
-      pg.drawText(pdfText("Workorder " + ref + "  ·  Photo " + (i + 1) + " of " + total), { x: 10, y: 9, size: 10, font: reg, color: gray });
+      // Hoja carta, foto a su tamaño real (nunca se agranda), centrada
+      const land = img.width > img.height;
+      const W = land ? 792 : 612, H = land ? 612 : 792, M = 28, FOOT = 26;
+      const sc = Math.min(0.75, (W - 2 * M) / img.width, (H - 2 * M - FOOT) / img.height);
+      const w = img.width * sc, h = img.height * sc;
+      const pg = doc.addPage([W, H]);
+      pg.drawImage(img, { x: (W - w) / 2, y: FOOT + M + (H - 2 * M - FOOT - h) / 2, width: w, height: h });
+      pg.drawText(pdfText("Workorder " + ref + "  ·  Photo " + (i + 1) + " of " + total), { x: M, y: M - 6, size: 9, font: reg, color: gray });
     }
     saveBlob(new Blob([await doc.save()], { type: "application/pdf" }),
       "Service Report - " + safeRef() + (list.length < total ? " (" + list.length + " photos)" : "") + ".pdf");
