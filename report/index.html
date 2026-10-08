@@ -167,7 +167,11 @@ const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
 // Pide JSON al script SIN cookies de Google (no importa cuántas cuentas tenga abiertas)
 const DEBUG = new URLSearchParams(location.search).get("debug") === "1";
 const T0 = performance.now(), times = [];
-function logTime(what, ms, tries) {
+const stats = { repB: 0, repG: 0, cached: false, phB: [], phG: [], kb: [], retries: 0 };
+function logTime(what, ms, tries, j) {
+  stats.retries += tries - 1;
+  if (what === "report") { stats.repB = ms / 1000; stats.repG = (j.ms || 0) / 1000; stats.cached = !!j.cached; }
+  else { stats.phB.push(ms / 1000); stats.phG.push((j.ms || 0) / 1000); if (j.kb) stats.kb.push(j.kb); }
   if (!DEBUG) return;
   times.push(what + ": " + (ms / 1000).toFixed(1) + "s" + (tries > 1 ? " (" + tries + " tries)" : ""));
   let box = document.getElementById("dbg");
@@ -181,7 +185,7 @@ async function getJSON(params) {
     try {
       const r = await fetch(url, { credentials: "omit", redirect: "follow", cache: "no-store" });
       const j = await r.json();
-      if (j.ok) { logTime(params.api === "photo" ? "photo" : "report", performance.now() - t, i + 1); return j; }
+      if (j.ok) { if (params.api !== "log") logTime(params.api === "photo" ? "photo" : "report", performance.now() - t, i + 1, j); return j; }
       if (j.error === "invalid" || j.error === "not_found") throw Object.assign(new Error(j.error), { final: true });
     } catch (e) { if (e.final) throw e; }
     await sleep(800 * (i + 1) + Math.random() * 600);   // Google ocupado → esperar y reintentar
@@ -259,6 +263,22 @@ function render(d) {
   refreshSel();
   setProgress();
   loading = loadAll(photos.map((_, i) => i));
+  loading.then(sendSpeedLog);
+}
+
+// Manda 1 fila a SPEED_LOG con cuánto tardó esta apertura (para medir sin pedir capturas)
+let speedSent = false;
+function sendSpeedLog() {
+  if (speedSent) return; speedSent = true;
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+  const d = {
+    page: "v2" + (qs.get("dl") === "pdf" ? "-pdf" : ""), photos: photos.length,
+    total: (performance.now() - T0) / 1000, repB: stats.repB, repG: stats.repG, cached: stats.cached,
+    phB: avg(stats.phB), phG: avg(stats.phG), phMax: Math.max(0, ...stats.phB), kb: avg(stats.kb),
+    retries: stats.retries, ua: (/iPhone|iPad|Android/.exec(navigator.userAgent) || ["Desktop"])[0] + " " + (/(Edg|Chrome|Firefox|Safari)\/[\d]+/.exec(navigator.userAgent) || [""])[0]
+  };
+  fetch(API + "?" + new URLSearchParams({ api: "log", task_id: T, k: K, d: JSON.stringify(d) }).toString(),
+        { credentials: "omit", redirect: "follow", cache: "no-store" }).catch(() => {});
 }
 
 async function loadOne(i) {
