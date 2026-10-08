@@ -392,37 +392,50 @@ function downloadPdf() {
     doc.setTitle("Service Report - " + pdfText(ref));
     doc.setAuthor("OC Clean Masters");
 
-    const c = doc.addPage([612, 792]);
-    c.drawRectangle({ x: 0, y: 692, width: 612, height: 100, color: navy });
-    c.drawText("OC CLEAN MASTERS", { x: 48, y: 742, size: 22, font: bold, color: L.rgb(1, 1, 1) });
-    c.drawText("SERVICE COMPLETION REPORT", { x: 48, y: 718, size: 11, font: reg, color: L.rgb(0.75, 0.80, 0.86) });
-    let y = 618;
-    c.drawText(pdfText("WORKORDER: " + ref).toUpperCase(), { x: 66, y, size: 11, font: bold, color: gray });
-    y -= 18;
-    if (report.date) { c.drawText(pdfText(report.date), { x: 66, y, size: 11, font: reg, color: gray }); y -= 26; } else y -= 8;
-    wrap(report.description, bold, 16, 490).slice(0, 7).forEach(l => { c.drawText(l, { x: 66, y, size: 16, font: bold, color: navy }); y -= 21; });
-    c.drawRectangle({ x: 48, y: y + 10, width: 5, height: 632 - (y + 10), color: orange });
-    y -= 20;
-    c.drawText(list.length === total ? plural(total, "photo") : list.length + " of " + total + " photos", { x: 48, y, size: 12, font: reg, color: navy });
-    c.drawText("OC Clean Masters  ·  705-690-7272  ·  oc.northmasters.ca", { x: 48, y: 40, size: 9, font: reg, color: gray });
-
-    let k = 0;
+    // Sin portada: cada hoja lleva arriba los datos del trabajo y abajo el número de foto.
+    const title = pdfText(report.description);
+    const head1 = "OC CLEAN MASTERS";
+    const head2 = "Workorder " + pdfText(ref);
+    let k = 0, first = null;
     for (const i of list) {
       label("Preparing PDF… " + (++k) + "/" + list.length);
-      const [head, b64] = srcs[i].split(",");
+      const [hd, b64] = srcs[i].split(",");
       const bytes = b64bytes(b64);
       let img;
-      try { img = head.indexOf("image/png") > -1 ? await doc.embedPng(bytes) : await doc.embedJpg(bytes); }
+      try { img = hd.indexOf("image/png") > -1 ? await doc.embedPng(bytes) : await doc.embedJpg(bytes); }
       catch (e) { continue; }   // formato raro (webp/gif): se salta
-      // Hoja carta, foto a su tamaño real (nunca se agranda), centrada
+
+      // Hoja carta (vertical u horizontal según la foto). Foto a su tamaño real
+      // (1 px de la foto = 1 px de pantalla al 100%); solo se achica si no cabe.
       const land = img.width > img.height;
-      const W = land ? 792 : 612, H = land ? 612 : 792, M = 28, FOOT = 26;
-      const sc = Math.min(0.75, (W - 2 * M) / img.width, (H - 2 * M - FOOT) / img.height);
+      const W = land ? 792 : 612, H = land ? 612 : 792, M = 28, TOP = 50, FOOT = 30;
+      const boxW = W - 2 * M, boxH = H - TOP - FOOT - 2 * M;
+      const sc = Math.min(0.75, boxW / img.width, boxH / img.height);
       const w = img.width * sc, h = img.height * sc;
       const pg = doc.addPage([W, H]);
-      pg.drawImage(img, { x: (W - w) / 2, y: FOOT + M + (H - 2 * M - FOOT - h) / 2, width: w, height: h });
-      pg.drawText(pdfText("Workorder " + ref + "  ·  Photo " + (i + 1) + " of " + total), { x: M, y: M - 6, size: 9, font: reg, color: gray });
+      if (!first) first = pg;
+
+      // Encabezado
+      pg.drawText(head1, { x: M, y: H - M - 10, size: 10, font: bold, color: navy });
+      const h2w = bold.widthOfTextAtSize(head2, 10);
+      pg.drawText(head2, { x: W - M - h2w, y: H - M - 10, size: 10, font: bold, color: navy });
+      let t = title;
+      while (t.length > 3 && reg.widthOfTextAtSize(t, 9) > boxW) t = t.slice(0, -2);
+      if (t !== title) t = t.slice(0, -3) + "...";
+      pg.drawText(t, { x: M, y: H - M - 24, size: 9, font: reg, color: gray });
+      pg.drawRectangle({ x: M, y: H - M - 32, width: boxW, height: 1.5, color: orange });
+
+      // Foto centrada
+      pg.drawImage(img, { x: (W - w) / 2, y: FOOT + M + (boxH - h) / 2, width: w, height: h });
+
+      // Pie
+      pg.drawRectangle({ x: M, y: M + 14, width: boxW, height: 0.5, color: gray });
+      pg.drawText("Photo " + (i + 1) + " of " + total, { x: M, y: M, size: 9, font: bold, color: navy });
+      const foot = "705-690-7272  ·  oc.northmasters.ca";
+      pg.drawText(foot, { x: W - M - reg.widthOfTextAtSize(foot, 9), y: M, size: 9, font: reg, color: gray });
     }
+    // Que el PDF abra al 100% (fotos a su tamaño real) en los visores que lo respetan
+    if (first) doc.catalog.set(L.PDFName.of("OpenAction"), doc.context.obj([first.ref, L.PDFName.of("XYZ"), null, null, 1]));
     saveBlob(new Blob([await doc.save()], { type: "application/pdf" }),
       "Service Report - " + safeRef() + (list.length < total ? " (" + list.length + " photos)" : "") + ".pdf");
   });
@@ -469,6 +482,14 @@ lb.addEventListener("touchend", e => {
   if (!T || !K) return fail("This link is incomplete. Please use the button in our email.");
   try {
     render(await getJSON({ api: "report", task_id: T, k: K }));
+    if (qs.get("dl") === "pdf" && photos.length) {
+      const bar = $("#selbar");
+      bar.textContent = "Your PDF report is being prepared. The download will start by itself in a few seconds.";
+      bar.style.display = "block";
+      await downloadPdf();
+      bar.textContent = "Your PDF report was downloaded. If you don't see it, tap Download PDF.";
+      setTimeout(() => { bar.style.display = ""; }, 8000);
+    }
   } catch (e) {
     fail(e.message === "invalid"
       ? "This link is not valid. Please use the button in our email."
