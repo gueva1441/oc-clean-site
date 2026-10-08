@@ -138,13 +138,16 @@
   <button class="lbb" id="lbX" aria-label="Close">✕</button>
   <button class="lbb" id="lbP" aria-label="Previous">‹</button>
   <button class="lbb" id="lbN" aria-label="Next">›</button>
-  <a class="lbb" id="lbD" download>Download</a>
+  <a class="lbb" id="lbD" href="#">Download</a>
   <div id="lbC"></div>
 </div>
 
 <script>
 // URL /exec del Task Portal
 const API = "https://script.google.com/macros/s/AKfycbye8a8dAv-ZyQcjfJcJRwaRBWN5Pwqnrq0E4OnfSwl6uVntjuN9jHaYXro-If_mXgtP/exec";
+// Copia rápida de las fotos en el VPS (Coolify). Si no está, se usa Google.
+const FAST = "https://n8n.northmasters.ca/photos";
+let MODE = "google";          // "vps" cuando las fotos salen del VPS
 const PARALLEL = 3;     // fotos al mismo tiempo (medido en SPEED_LOG: 3 es lo más estable en cel)
 const BATCH    = 1;     // fotos por viaje (3 por viaje resultó más lento en SPEED_LOG)
 const TRIES    = 6;     // reintentos si Google está ocupado
@@ -194,7 +197,7 @@ async function getJSON(params) {
   throw new Error("server");
 }
 
-let report = null, photos = [], srcs = [], loading = Promise.resolve();
+let report = null, photos = [], srcs = [], mimes = [], loading = Promise.resolve();
 let selected = new Set(), anchor = null, loadedCount = 0, selectMode = false;
 
 // ---------------- progreso ----------------
@@ -212,7 +215,7 @@ function setProgress() {
 
 // ---------------- pintar ----------------
 function render(d) {
-  report = d; photos = d.photos; srcs = new Array(photos.length);
+  report = d; photos = d.photos; srcs = new Array(photos.length); mimes = new Array(photos.length);
   document.title = "Service Report " + d.reference + " · OC Clean Masters";
   const chips = [
     plural(photos.length, "photo"),
@@ -273,7 +276,7 @@ function sendSpeedLog() {
   if (speedSent) return; speedSent = true;
   const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
   const d = {
-    page: "v2" + (qs.get("dl") === "pdf" ? "-pdf" : ""), photos: photos.length,
+    page: (MODE === "vps" ? "v3-vps" : "v3-google") + (qs.get("dl") === "pdf" ? "-pdf" : ""), photos: photos.length,
     total: (performance.now() - T0) / 1000, repB: stats.repB, repG: stats.repG, cached: stats.cached,
     phB: avg(stats.phB), phG: avg(stats.phG), phMax: Math.max(0, ...stats.phB), kb: avg(stats.kb),
     retries: stats.retries, ua: (/iPhone|iPad|Android/.exec(navigator.userAgent) || ["Desktop"])[0] + " " + (/(Edg|Chrome|Firefox|Safari)\/[\d]+/.exec(navigator.userAgent) || [""])[0]
@@ -285,6 +288,7 @@ function sendSpeedLog() {
 function showPhoto(i, mime, data) {
   const el = document.getElementById("ph" + i);
   srcs[i] = "data:" + mime + ";base64," + data;
+  mimes[i] = mime;
   el.className = "ph" + (selected.has(i) ? " sel" : "");
   el.onclick = null;
   el.innerHTML = '<img alt="Photo ' + (i + 1) + '"><span class="n">' + (i + 1) + '</span><span class="ck" role="checkbox" aria-label="Select photo ' + (i + 1) + '">' + ICON_CK + '</span>';
@@ -345,7 +349,42 @@ async function loadBatch(list) {
   for (const i of list) await loadOne(i);
 }
 
+// VPS: las fotos son archivos normales; se cargan como imágenes (6 a la vez).
+function loadFromVps(i) {
+  return new Promise(resolve => {
+    const el = document.getElementById("ph" + i);
+    const p = photos[i], t = performance.now();
+    const im = new Image();
+    im.onload = () => {
+      stats.phB.push((performance.now() - t) / 1000); if (p.kb) stats.kb.push(p.kb);
+      srcs[i] = p.url; mimes[i] = p.mime;
+      el.className = "ph" + (selected.has(i) ? " sel" : "");
+      el.onclick = null;
+      el.innerHTML = '<span class="n">' + (i + 1) + '</span><span class="ck" role="checkbox" aria-label="Select photo ' + (i + 1) + '">' + ICON_CK + '</span>';
+      im.alt = "Photo " + (i + 1);
+      el.prepend(im);
+      requestAnimationFrame(() => im.classList.add("in"));
+      im.onclick = e => onTile(e, i, false);
+      el.querySelector(".ck").onclick = e => { e.stopPropagation(); onTile(e, i, true); };
+      loadedCount++; setProgress(); resolve();
+    };
+    im.onerror = () => {
+      el.className = "ph fail";
+      el.textContent = "Photo " + (i + 1) + " didn't load — tap to retry";
+      el.onclick = () => loadAll([i]);
+      setProgress(); resolve();
+    };
+    im.src = p.url + (el.dataset.retry ? "?r=" + Date.now() : "");
+    el.dataset.retry = "1";
+  });
+}
+
 async function loadAll(list) {
+  if (MODE === "vps") {
+    const q = list.slice();
+    const w = async () => { while (q.length) await loadFromVps(q.shift()); };
+    return Promise.all(Array.from({ length: Math.min(6, q.length) }, w));
+  }
   const chunks = [];
   for (let n = 0; n < list.length; n += BATCH) chunks.push(list.slice(n, n + BATCH));
   const worker = async () => { while (chunks.length) await loadBatch(chunks.shift()); };
@@ -385,8 +424,9 @@ function refreshSel() {
 
 const chosen = () => selected.size ? [...selected].sort((a, b) => a - b) : photos.map((_, i) => i);
 
-async function ensureLoaded(list) {
-  await loading;
+async function ensureLoaded(list, label) {
+  const tick = label ? setInterval(() => label("Getting photos… " + loadedCount + " of " + photos.length), 400) : null;
+  try { await loading; } finally { if (tick) clearInterval(tick); }
   const missing = list.filter(i => !srcs[i]);
   if (missing.length) await loadAll(missing);
   return list.filter(i => srcs[i]);
@@ -402,7 +442,8 @@ function loadScript(src, globalName) {
 }
 
 const safeRef = () => String(report.reference).replace(/[^\w\- ]+/g, "").trim() || "OC-Clean";
-const extOf = src => src.slice(5, src.indexOf(";")).split("/")[1].replace("jpeg", "jpg");
+const extOf = i => (String(mimes[i] || "image/jpeg").split("/")[1] || "jpg").replace("jpeg", "jpg");
+const getBlob = i => fetch(srcs[i], { credentials: "omit" }).then(r => { if (!r.ok) throw new Error("photo"); return r.blob(); });
 const b64bytes = b64 => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 function saveBlob(blob, name) {
   const a = document.createElement("a");
@@ -423,16 +464,14 @@ async function busy(btn, fn) {
 function downloadZip() {
   return busy($("#zipBtn"), async label => {
     label("Getting photos…");
-    const list = await ensureLoaded(chosen());
-    const name = i => "WO-" + safeRef() + "_photo-" + String(i + 1).padStart(2, "0") + "." + extOf(srcs[i]);
-    if (list.length === 1) {
-      const i = list[0];
-      return saveBlob(new Blob([b64bytes(srcs[i].split(",")[1])], { type: srcs[i].slice(5, srcs[i].indexOf(";")) }), name(i));
-    }
+    const list = await ensureLoaded(chosen(), label);
+    const name = i => "WO-" + safeRef() + "_photo-" + String(i + 1).padStart(2, "0") + "." + extOf(i);
+    if (list.length === 1) return saveBlob(await getBlob(list[0]), name(list[0]));
     label("Preparing ZIP…");
     await loadScript(JSZIP, "JSZip");
     const zip = new JSZip();
-    list.forEach(i => zip.file(name(i), srcs[i].split(",")[1], { base64: true }));
+    let got = 0;
+    for (const i of list) { zip.file(name(i), await getBlob(i)); label("Preparing ZIP… " + (++got) + " of " + list.length); }
     const blob = await zip.generateAsync({ type: "blob" }, m => label("Preparing ZIP… " + Math.round(m.percent) + "%"));
     saveBlob(blob, "WO-" + safeRef() + "_photos.zip");
   });
@@ -453,7 +492,7 @@ function wrap(text, font, size, max) {
 function downloadPdf() {
   return busy($("#pdfBtn"), async label => {
     label("Getting photos…");
-    const list = await ensureLoaded(chosen());
+    const list = await ensureLoaded(chosen(), label);
     label("Preparing PDF…");
     await loadScript(PDFLIB, "PDFLib");
     const L = window.PDFLib;
@@ -472,10 +511,9 @@ function downloadPdf() {
     let k = 0, first = null;
     for (const i of list) {
       label("Preparing PDF… " + (++k) + "/" + list.length);
-      const [hd, b64] = srcs[i].split(",");
-      const bytes = b64bytes(b64);
+      const bytes = new Uint8Array(await (await getBlob(i)).arrayBuffer());
       let img;
-      try { img = hd.indexOf("image/png") > -1 ? await doc.embedPng(bytes) : await doc.embedJpg(bytes); }
+      try { img = String(mimes[i]).indexOf("png") > -1 ? await doc.embedPng(bytes) : await doc.embedJpg(bytes); }
       catch (e) { continue; }   // formato raro (webp/gif): se salta
 
       // Hoja carta (vertical u horizontal según la foto). Foto a su tamaño real
@@ -521,9 +559,10 @@ function openLB(i) { cur = i; showLB(); lb.classList.add("on"); }
 function showLB() {
   $("#lbI").src = srcs[cur] || "";
   $("#lbC").textContent = (cur + 1) + " / " + photos.length;
-  const a = $("#lbD");
-  a.href = srcs[cur] || "#";
-  a.download = srcs[cur] ? "WO-" + safeRef() + "_photo-" + String(cur + 1).padStart(2, "0") + "." + extOf(srcs[cur]) : "";
+  $("#lbD").onclick = async e => {
+    e.preventDefault(); e.stopPropagation();
+    if (srcs[cur]) saveBlob(await getBlob(cur), "WO-" + safeRef() + "_photo-" + String(cur + 1).padStart(2, "0") + "." + extOf(cur));
+  };
 }
 function step(d) {
   for (let k = 1; k <= photos.length; k++) {
@@ -558,7 +597,17 @@ lb.addEventListener("touchend", e => {
   const fail = t => { app.innerHTML = '<div class="msg">' + t + '</div>'; };
   if (!T || !K) return fail("This link is incomplete. Please use the button in our email.");
   try {
-    render(await getJSON({ api: "report", task_id: T, k: K }));
+    let d = null;
+    try {   // 1) copia rápida en el VPS (máx. 4 s)
+      const t = performance.now();
+      const r = await fetch(FAST + "/api/report?" + new URLSearchParams({ t: T, k: K }), { credentials: "omit", cache: "no-store", signal: AbortSignal.timeout(4000) });
+      const j = await r.json();
+      if (j.ok && j.cached && Array.isArray(j.photos) && j.photos.length) {
+        d = j; MODE = "vps"; stats.repB = (performance.now() - t) / 1000; stats.cached = true;
+      }
+    } catch (e) {}
+    // 2) si no está en el VPS, Google (y el VPS empieza a copiarlas para la próxima)
+    render(d || await getJSON({ api: "report", task_id: T, k: K }));
     if (qs.get("dl") === "pdf" && photos.length) {
       const bar = $("#selbar");
       bar.textContent = "Your PDF report is being prepared. The download will start by itself in a few seconds.";
