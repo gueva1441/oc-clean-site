@@ -73,7 +73,20 @@
   .ck{position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:rgba(21,51,80,.35);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.0;transition:opacity .15s,background .15s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
   .ck svg{width:16px;height:16px;opacity:0}
   .ph:hover .ck, .selmode .ck, .ph.sel .ck{opacity:1}
-  @media (hover:none){ .ck{opacity:1} }
+  @media (hover:none){
+    .ck{opacity:1;width:40px;height:40px;right:8px;top:8px;background:rgba(255,255,255,.92);border:2px solid var(--navy)}
+    .ck svg{width:20px;height:20px}
+    .ph:not(.sel) .ck svg{opacity:0}
+  }
+  .selmode .ck{opacity:1;width:40px;height:40px;background:rgba(255,255,255,.92);border:2px solid var(--navy)}
+  .selmode .ph.sel .ck{background:var(--orange);border-color:#fff}
+  .selmode .ph img{cursor:pointer}
+  .selmode .ph:not(.sel) img{filter:brightness(.92)}
+  .btn-sel{background:#fff;color:var(--navy);border:2px solid var(--navy);box-shadow:none;padding:9px 16px}
+  .btn-sel:hover{background:#eef2f7}
+  .btn-sel.on{background:var(--navy);color:#fff}
+  .selbar{display:none;background:#fff7ed;border:1px solid #f5c89e;color:#7c3d0c;border-radius:10px;padding:10px 14px;font-size:15px;font-weight:600;margin:0 0 10px}
+  .selmode-on .selbar{display:block}
   .ph.sel{outline-color:var(--orange);box-shadow:0 6px 18px -8px rgba(218,126,48,.8)}
   .ph.sel .ck{background:var(--orange)}
   .ph.sel .ck svg{opacity:1}
@@ -139,6 +152,7 @@ const JSZIP  = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
 
 const ICON_DL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>';
 const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M9 15h6"/><path d="M9 18h4"/></svg>';
+const ICON_SEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m8 12 3 3 5-6"/></svg>';
 const ICON_CK  = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
 
 const $ = s => document.querySelector(s);
@@ -166,7 +180,7 @@ async function getJSON(params) {
 }
 
 let report = null, photos = [], srcs = [], loading = Promise.resolve();
-let selected = new Set(), anchor = null, loadedCount = 0;
+let selected = new Set(), anchor = null, loadedCount = 0, selectMode = false;
 
 // ---------------- progreso ----------------
 function setProgress() {
@@ -205,7 +219,7 @@ function render(d) {
   const tools = document.createElement("div");
   tools.className = "tools";
   tools.innerHTML =
-    '<div class="tl"><span class="count" id="cnt"></span>' +
+    '<div class="tl"><button class="btn btn-sel" id="selMode">' + ICON_SEL + '<span>Select photos</span></button><span class="count" id="cnt"></span>' +
       '<button class="link" id="selAll">Select all</button>' +
       '<button class="link" id="selNone" style="display:none">Clear</button>' +
       '<span id="hint" style="font-size:13px">Tip: Ctrl + click selects photos · Shift + click selects a range</span></div>' +
@@ -214,6 +228,10 @@ function render(d) {
       '<button class="btn btn-or" id="pdfBtn">' + ICON_PDF + '<span>Download PDF</span></button>' +
     '</div>';
   grid.before(tools);
+  const bar = document.createElement("div");
+  bar.className = "selbar"; bar.id = "selbar";
+  bar.textContent = "Tap the photos you want. Then use Download photos or Download PDF.";
+  grid.before(bar);
 
   grid.innerHTML = "";
   photos.forEach((p, i) => {
@@ -222,11 +240,12 @@ function render(d) {
     grid.appendChild(el);
   });
 
+  $("#selMode").onclick = () => { selectMode = !selectMode; if (!selectMode) { selected.clear(); anchor = null; } refreshSel(); };
   $("#selAll").onclick  = () => { photos.forEach((_, i) => selected.add(i)); refreshSel(); };
   $("#selNone").onclick = () => { selected.clear(); anchor = null; refreshSel(); };
   $("#zipBtn").onclick  = downloadZip;
   $("#pdfBtn").onclick  = downloadPdf;
-  if (matchMedia("(hover:none)").matches) $("#hint").textContent = "Tap the circles to select photos";
+  if (matchMedia("(hover:none)").matches) $("#hint").style.display = "none";
   refreshSel();
   setProgress();
   loading = loadAll(photos.map((_, i) => i));
@@ -262,7 +281,7 @@ async function loadAll(list) {
 
 // ---------------- selección (como en la compu: Shift = rango, Ctrl = una) ----------------
 function onTile(e, i, fromCheck) {
-  const selMode = selected.size > 0;
+  const selMode = selectMode || selected.size > 0;
   if (e.shiftKey && anchor === null) {
     selected.add(i); anchor = i;
   } else if (e.shiftKey) {
@@ -280,7 +299,10 @@ function onTile(e, i, fromCheck) {
 function refreshSel() {
   const n = photos.length, s = selected.size;
   document.querySelectorAll(".ph").forEach((el, i) => el.classList.toggle("sel", selected.has(i)));
-  $("#grid").classList.toggle("selmode", s > 0);
+  $("#grid").classList.toggle("selmode", selectMode || s > 0);
+  app.classList.toggle("selmode-on", selectMode);
+  $("#selMode").classList.toggle("on", selectMode);
+  $("#selMode span").textContent = selectMode ? "Cancel" : "Select photos";
   $("#cnt").textContent = s ? s + " of " + n + " selected" : plural(n, "photo");
   $("#selAll").style.display  = s < n ? "" : "none";
   $("#selNone").style.display = s ? "" : "none";
