@@ -5,138 +5,254 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Service Report · OC Clean Masters</title>
+<link rel="icon" href="/assets/img/brand/favicon.png">
 <style>
-  :root{--ink:#1a202c;--muted:#718096;--line:#e2e8f0;--blue:#3182ce;--bg:#f4f7f6}
+  :root{
+    --navy:#153350; --navy-2:#1f4a73; --orange:#da7e30; --orange-2:#c46c22;
+    --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --bg:#f3f5f8; --card:#fff;
+  }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
-  header{background:var(--ink);color:#fff}
-  .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
-  header .wrap{padding:20px 16px}
-  .brand{font-size:19px;font-weight:700;letter-spacing:1px}
-  .sub{color:#a0aec0;font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-  .card{background:#fff;border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:6px;padding:16px 18px;margin:18px 0}
-  .meta{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.3px}
-  .desc{font-size:18px;font-weight:700;margin-top:6px;line-height:1.4;white-space:pre-wrap}
-  .bar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;font-size:14px;color:var(--muted);margin:0 0 10px}
-  .bar span:first-child{white-space:nowrap;font-weight:700;color:var(--ink)}
-  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:start;padding-bottom:30px}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+
+  header{background:#fff;border-top:4px solid var(--navy);border-bottom:1px solid var(--line)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+  header img{height:58px;width:auto;display:block}
+  header .tag{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--navy)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--navy);border-radius:10px;padding:16px 18px;margin:18px 0 14px}
+  .meta{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.4px}
+  .desc{font-size:19px;font-weight:700;margin-top:6px;line-height:1.35;color:var(--navy);white-space:pre-wrap}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{font-size:13px;background:#eef2f7;color:var(--navy);padding:4px 10px;border-radius:999px;font-weight:600}
+
+  /* skeleton */
+  .sk{background:linear-gradient(90deg,#e9edf2 25%,#f6f8fa 50%,#e9edf2 75%);background-size:200% 100%;animation:sh 1.1s linear infinite;border-radius:6px}
+  @keyframes sh{to{background-position:-200% 0}}
+  .sk-line{height:12px;margin:4px 0}
+
+  /* progress banner */
+  .loadbox{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0 0 14px;display:flex;align-items:center;gap:14px;transition:opacity .4s,max-height .4s,margin .4s,padding .4s;max-height:120px;overflow:hidden}
+  .loadbox.done{opacity:0;max-height:0;margin:0;padding:0 16px;border-width:0}
+  .spin{width:26px;height:26px;border:3px solid #dbe3ec;border-top-color:var(--orange);border-radius:50%;animation:rot .8s linear infinite;flex:none}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  .loadtxt{flex:1;min-width:0}
+  .loadtxt b{display:block;font-size:16px;color:var(--navy)}
+  .loadtxt span{font-size:13px;color:var(--muted)}
+  .bar{height:8px;background:#e9edf2;border-radius:99px;overflow:hidden;margin-top:8px}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--orange),#f0a35e);border-radius:99px;transition:width .35s}
+  .bar.ind i{width:35%;animation:ind 1.2s ease-in-out infinite}
+  @keyframes ind{0%{margin-left:-35%}100%{margin-left:100%}}
+
+  /* toolbar */
+  .tools{position:sticky;top:0;z-index:5;background:rgba(243,245,248,.94);backdrop-filter:blur(6px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;margin-bottom:6px}
+  .tl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+  .tl .count{font-weight:700;color:var(--ink);font-size:15px}
+  .link{background:none;border:0;color:var(--navy-2);font-weight:700;font-size:14px;cursor:pointer;padding:4px 2px;text-decoration:underline;text-underline-offset:3px}
+  .tr{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:10px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;color:#fff;white-space:nowrap;
+       box-shadow:0 2px 0 rgba(0,0,0,.12),0 6px 16px -6px rgba(21,51,80,.45);transition:transform .12s,box-shadow .12s,background .12s}
+  .btn svg{width:18px;height:18px;flex:none}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 3px 0 rgba(0,0,0,.12),0 10px 20px -8px rgba(21,51,80,.55)}
+  .btn:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(0,0,0,.12)}
+  .btn[disabled]{opacity:.75;cursor:wait;transform:none}
+  .btn-or{background:var(--orange)} .btn-or:hover{background:var(--orange-2)}
+  .btn-nv{background:var(--navy)}   .btn-nv:hover{background:var(--navy-2)}
+  @media (max-width:560px){ .tr{width:100%} .tr .btn{flex:1;justify-content:center;padding:12px 10px;font-size:14px} }
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start;padding-bottom:34px}
   @media (max-width:860px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media (max-width:520px){.grid{grid-template-columns:minmax(0,1fr)}}
-  .btn{background:var(--blue);color:#fff;border:0;border-radius:6px;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
-  .btn[disabled]{opacity:.7;cursor:wait}
-  .ph{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;position:relative}
-  .ph.wait{aspect-ratio:4/3;background:linear-gradient(90deg,#edf2f7 25%,#f7fafc 50%,#edf2f7 75%);background-size:200% 100%;animation:sh 1.2s infinite}
-  @keyframes sh{to{background-position:-200% 0}}
-  .ph img{display:block;width:100%;height:auto;cursor:zoom-in}
-  .ph .n{position:absolute;left:8px;top:8px;background:rgba(26,32,44,.75);color:#fff;font-size:12px;padding:2px 7px;border-radius:4px}
-  .ph.fail{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;cursor:pointer}
-  .msg{text-align:center;padding:60px 16px;color:var(--muted);font-size:16px}
-  footer{text-align:center;font-size:12px;color:#a0aec0;padding:18px 16px;border-top:1px solid var(--line);background:#f7fafc}
-  #lb{display:none;position:fixed;inset:0;background:rgba(10,12,16,.95);z-index:9;align-items:center;justify-content:center}
+  .ph{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative;outline:3px solid transparent;outline-offset:-3px;transition:outline-color .15s, box-shadow .15s;user-select:none;-webkit-user-select:none}
+  .ph.wait{aspect-ratio:4/3}
+  .ph.sk{background:linear-gradient(90deg,#e3e8ee 25%,#f5f7fa 50%,#e3e8ee 75%);background-size:200% 100%;animation:sh 1.1s linear infinite;border-color:#e3e8ee}
+  .ph img{display:block;width:100%;height:auto;cursor:zoom-in;opacity:0;transition:opacity .45s}
+  .ph img.in{opacity:1}
+  .ph .n{position:absolute;left:10px;top:10px;background:rgba(21,51,80,.82);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px}
+  .ck{position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:rgba(21,51,80,.35);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.0;transition:opacity .15s,background .15s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+  .ck svg{width:16px;height:16px;opacity:0}
+  .ph:hover .ck, .selmode .ck, .ph.sel .ck{opacity:1}
+  @media (hover:none){ .ck{opacity:1} }
+  .ph.sel{outline-color:var(--orange);box-shadow:0 6px 18px -8px rgba(218,126,48,.8)}
+  .ph.sel .ck{background:var(--orange)}
+  .ph.sel .ck svg{opacity:1}
+  .ph.fail{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;cursor:pointer;text-align:center;padding:10px}
+
+  .msg{text-align:center;padding:60px 16px;color:var(--muted);font-size:17px}
+  footer{text-align:center;font-size:12px;color:#9ca3af;padding:18px 16px;border-top:1px solid var(--line);background:#fff}
+  footer a{color:inherit;text-decoration:none}
+
+  #lb{display:none;position:fixed;inset:0;background:rgba(8,12,18,.95);z-index:20;align-items:center;justify-content:center}
   #lb.on{display:flex}
   #lb img{max-width:100%;max-height:100%;object-fit:contain}
-  #lb button,#lb a{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:6px;font-size:15px;padding:10px 14px;cursor:pointer;text-decoration:none}
-  #lbX{top:12px;right:12px} #lbP{left:12px;top:50%} #lbN{right:12px;top:50%}
-  #lbC{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);color:#cbd5e0;font-size:13px}
-  #lbD{bottom:10px;right:12px}
+  #lb .lbb{position:absolute;background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;font-size:22px;width:46px;height:46px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none}
+  #lbX{top:12px;right:12px} #lbP{left:12px;top:calc(50% - 23px)} #lbN{right:12px;top:calc(50% - 23px)}
+  #lbD{bottom:12px;right:12px;width:auto!important;padding:0 14px;font-size:14px!important;font-weight:700}
+  #lbC{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);color:#cbd5e0;font-size:14px}
 </style>
 </head>
 <body>
 <header><div class="wrap">
-  <div class="brand">OC CLEAN MASTERS</div>
-  <div class="sub">Service Completion Report</div>
+  <img src="logo.png" alt="OC Clean Masters">
+  <div class="tag">Service report</div>
 </div></header>
 
-<main class="wrap" id="app"><div class="msg">Loading report…</div></main>
+<main class="wrap" id="app">
+  <!-- Se ve al instante, mientras llega la info -->
+  <div class="card">
+    <div class="sk sk-line" style="width:240px"></div>
+    <div class="sk sk-line" style="width:60%;height:18px;margin-top:10px"></div>
+  </div>
+  <div class="loadbox" id="loadbox">
+    <div class="spin"></div>
+    <div class="loadtxt">
+      <b id="loadT">Loading your photos…</b>
+      <span id="loadS">This takes a few seconds. Please keep this page open.</span>
+      <div class="bar ind" id="bar"><i></i></div>
+    </div>
+  </div>
+  <div class="grid" id="grid">
+    <div class="ph wait sk"></div><div class="ph wait sk"></div><div class="ph wait sk"></div>
+    <div class="ph wait sk"></div><div class="ph wait sk"></div><div class="ph wait sk"></div>
+  </div>
+</main>
 
-<footer>&copy; <span id="yr"></span> NorthMasters Commercial Cleaning Services &bull; Ontario, Canada</footer>
+<footer>&copy; <span id="yr"></span> OC Clean Masters · <a href="tel:7056907272">705-690-7272</a> · <a href="https://oc.northmasters.ca">oc.northmasters.ca</a></footer>
 
 <div id="lb" role="dialog" aria-label="Photo viewer">
   <img id="lbI" alt="">
-  <button id="lbX" aria-label="Close">✕</button>
-  <button id="lbP" aria-label="Previous">‹</button>
-  <button id="lbN" aria-label="Next">›</button>
-  <a id="lbD" download>Download</a>
+  <button class="lbb" id="lbX" aria-label="Close">✕</button>
+  <button class="lbb" id="lbP" aria-label="Previous">‹</button>
+  <button class="lbb" id="lbN" aria-label="Next">›</button>
+  <a class="lbb" id="lbD" download>Download</a>
   <div id="lbC"></div>
 </div>
 
 <script>
-// ↓↓↓ PEGÁ AQUÍ la URL /exec de tu Task Portal (la misma de WEB_APP_URL) ↓↓↓
+// URL /exec del Task Portal
 const API = "https://script.google.com/macros/s/AKfycbye8a8dAv-ZyQcjfJcJRwaRBWN5Pwqnrq0E4OnfSwl6uVntjuN9jHaYXro-If_mXgtP/exec";
-// ↑↑↑ ---------------------------------------------------------------- ↑↑↑
+const PARALLEL = 3;     // fotos pidiéndose al mismo tiempo
+const TRIES    = 6;     // reintentos si Google está ocupado
+const PDFLIB = "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
+const JSZIP  = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
 
-const PARALLEL = 3;          // fotos pidiéndose al mismo tiempo
-const TRIES    = 6;          // reintentos si Google está ocupado
+const ICON_DL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>';
+const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M9 15h6"/><path d="M9 18h4"/></svg>';
+const ICON_CK  = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
 
 const $ = s => document.querySelector(s);
 const app = $("#app");
-document.getElementById("yr").textContent = new Date().getFullYear();
+$("#yr").textContent = new Date().getFullYear();
 const qs = new URLSearchParams(location.search);
 const T = qs.get("t") || "", K = qs.get("k") || "";
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
 
-// Pide JSON al script SIN cookies de Google (así no importa cuántas cuentas tenga abiertas)
+// Pide JSON al script SIN cookies de Google (no importa cuántas cuentas tenga abiertas)
 async function getJSON(params) {
   const url = API + "?" + new URLSearchParams(params).toString();
-  let last = "server";
   for (let i = 0; i < TRIES; i++) {
     try {
       const r = await fetch(url, { credentials: "omit", redirect: "follow", cache: "no-store" });
       const j = await r.json();
       if (j.ok) return j;
       if (j.error === "invalid" || j.error === "not_found") throw Object.assign(new Error(j.error), { final: true });
-      last = j.error || "server";
-    } catch (e) {
-      if (e.final) throw e;
-      last = "network";
-    }
+    } catch (e) { if (e.final) throw e; }
     await sleep(800 * (i + 1) + Math.random() * 600);   // Google ocupado → esperar y reintentar
   }
-  throw new Error(last);
+  throw new Error("server");
 }
 
 let report = null, photos = [], srcs = [], loading = Promise.resolve();
+let selected = new Set(), anchor = null, loadedCount = 0;
 
+// ---------------- progreso ----------------
+function setProgress() {
+  const n = photos.length;
+  $("#bar").classList.remove("ind");
+  $("#bar i").style.width = (n ? Math.round(loadedCount / n * 100) : 100) + "%";
+  $("#loadT").textContent = "Loading photos… " + loadedCount + " of " + n;
+  if (loadedCount >= n) {
+    $("#loadT").textContent = "All " + plural(n, "photo") + " loaded";
+    $("#loadS").textContent = "";
+    setTimeout(() => $("#loadbox").classList.add("done"), 700);
+  }
+}
+
+// ---------------- pintar ----------------
 function render(d) {
+  report = d; photos = d.photos; srcs = new Array(photos.length);
   document.title = "Service Report " + d.reference + " · OC Clean Masters";
-  app.innerHTML =
-    '<div class="card"><div class="meta">Workorder: ' + esc(d.reference) + (d.date ? " · " + esc(d.date) : "") + '</div>' +
-    '<div class="desc">' + esc(d.description) + '</div></div>' +
-    '<div class="bar"><span id="cnt">' + d.photos.length + ' photo' + (d.photos.length === 1 ? "" : "s") + '</span>' +
-    (d.videos ? '<span>+ ' + d.videos + ' video(s) on file — reply to our email to receive them</span>' : '') +
-    (d.photos.length ? '<button class="btn" id="pdfBtn">Download PDF</button>' : '') + '</div>' +
-    (d.photos.length ? '<div class="grid" id="grid"></div>' : '<div class="msg">No photos found for this workorder.</div>');
+  const chips = [
+    d.completed ? "Completed " + esc(d.completed) : "",
+    plural(photos.length, "photo"),
+    d.videos ? plural(d.videos, "video") + " on file" : ""
+  ].filter(Boolean).map(c => '<span class="chip">' + c + '</span>').join("");
+
+  app.querySelector(".card").innerHTML =
+    '<div class="meta">Workorder ' + esc(d.reference) + (d.date ? " · " + esc(d.date) : "") + '</div>' +
+    '<div class="desc">' + esc(d.description) + '</div><div class="chips">' + chips + '</div>' +
+    (d.videos ? '<div style="font-size:13px;color:var(--muted);margin-top:8px">Videos are not shown here — reply to our email to receive them.</div>' : '');
+
   const grid = $("#grid");
-  if (!grid) return;
-  report = d;
-  photos = d.photos;
-  srcs = new Array(photos.length);
-  $("#pdfBtn").onclick = downloadPdf;
+  if (!photos.length) {
+    $("#loadbox").classList.add("done");
+    grid.outerHTML = '<div class="msg">No photos found for this workorder.</div>';
+    return;
+  }
+
+  const tools = document.createElement("div");
+  tools.className = "tools";
+  tools.innerHTML =
+    '<div class="tl"><span class="count" id="cnt"></span>' +
+      '<button class="link" id="selAll">Select all</button>' +
+      '<button class="link" id="selNone" style="display:none">Clear</button>' +
+      '<span id="hint" style="font-size:13px">Tip: Shift + click selects a range</span></div>' +
+    '<div class="tr">' +
+      '<button class="btn btn-nv" id="zipBtn">' + ICON_DL + '<span>Download photos</span></button>' +
+      '<button class="btn btn-or" id="pdfBtn">' + ICON_PDF + '<span>Download PDF</span></button>' +
+    '</div>';
+  grid.before(tools);
+
+  grid.innerHTML = "";
   photos.forEach((p, i) => {
     const el = document.createElement("div");
-    el.className = "ph wait"; el.id = "ph" + i;
+    el.className = "ph wait sk"; el.id = "ph" + i;
     grid.appendChild(el);
   });
+
+  $("#selAll").onclick  = () => { photos.forEach((_, i) => selected.add(i)); refreshSel(); };
+  $("#selNone").onclick = () => { selected.clear(); anchor = null; refreshSel(); };
+  $("#zipBtn").onclick  = downloadZip;
+  $("#pdfBtn").onclick  = downloadPdf;
+  if (matchMedia("(hover:none)").matches) $("#hint").textContent = "Tap the circles to select photos";
+  refreshSel();
+  setProgress();
   loading = loadAll(photos.map((_, i) => i));
 }
 
 async function loadOne(i) {
   const el = document.getElementById("ph" + i);
-  el.className = "ph wait"; el.innerHTML = ""; el.onclick = null;
+  el.className = "ph wait sk"; el.innerHTML = ""; el.onclick = null;
   try {
     const j = await getJSON({ api: "photo", id: photos[i].id, s: photos[i].s });
     srcs[i] = "data:" + j.mime + ";base64," + j.data;
-    el.className = "ph";
-    el.innerHTML = '<img alt="Photo ' + (i + 1) + '"><span class="n">' + (i + 1) + '</span>';
+    el.className = "ph" + (selected.has(i) ? " sel" : "");
+    el.innerHTML = '<img alt="Photo ' + (i + 1) + '"><span class="n">' + (i + 1) + '</span><span class="ck" role="checkbox" aria-label="Select photo ' + (i + 1) + '">' + ICON_CK + '</span>';
     const img = el.querySelector("img");
+    img.onload = () => img.classList.add("in");
     img.src = srcs[i];
-    img.onclick = () => openLB(i);
+    img.onclick = e => onTile(e, i, false);
+    el.querySelector(".ck").onclick = e => { e.stopPropagation(); onTile(e, i, true); };
+    loadedCount++;
   } catch (e) {
     el.className = "ph fail";
     el.textContent = "Photo " + (i + 1) + " didn't load — tap to retry";
     el.onclick = () => loadAll([i]);
   }
+  setProgress();
 }
 
 async function loadAll(list) {
@@ -145,16 +261,88 @@ async function loadAll(list) {
   await Promise.all(Array.from({ length: Math.min(PARALLEL, queue.length) }, worker));
 }
 
-// ---------- PDF: portada + 1 foto por página, cada foto tal cual se subió ----------
-const PDFLIB = "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
-function loadScript(src) {
+// ---------------- selección (como en la compu: Shift = rango, Ctrl = una) ----------------
+function onTile(e, i, fromCheck) {
+  const selMode = selected.size > 0;
+  if (e.shiftKey && anchor !== null) {
+    const [a, b] = [Math.min(anchor, i), Math.max(anchor, i)];
+    for (let k = a; k <= b; k++) selected.add(k);
+  } else if (fromCheck || e.ctrlKey || e.metaKey || selMode) {
+    selected.has(i) ? selected.delete(i) : selected.add(i);
+    anchor = i;
+  } else {
+    return openLB(i);
+  }
+  refreshSel();
+}
+
+function refreshSel() {
+  const n = photos.length, s = selected.size;
+  document.querySelectorAll(".ph").forEach((el, i) => el.classList.toggle("sel", selected.has(i)));
+  $("#grid").classList.toggle("selmode", s > 0);
+  $("#cnt").textContent = s ? s + " of " + n + " selected" : plural(n, "photo");
+  $("#selAll").style.display  = s < n ? "" : "none";
+  $("#selNone").style.display = s ? "" : "none";
+  $("#zipBtn span").textContent = s ? (s === 1 ? "Download 1 photo" : "Download " + s + " photos") : "Download all photos";
+  $("#pdfBtn span").textContent = s ? "PDF of " + plural(s, "photo") : "Download PDF";
+}
+
+const chosen = () => selected.size ? [...selected].sort((a, b) => a - b) : photos.map((_, i) => i);
+
+async function ensureLoaded(list) {
+  await loading;
+  const missing = list.filter(i => !srcs[i]);
+  if (missing.length) await loadAll(missing);
+  return list.filter(i => srcs[i]);
+}
+
+function loadScript(src, globalName) {
   return new Promise((ok, bad) => {
-    if (window.PDFLib) return ok();
+    if (window[globalName]) return ok();
     const sc = document.createElement("script");
     sc.src = src; sc.onload = ok; sc.onerror = bad;
     document.head.appendChild(sc);
   });
 }
+
+const safeRef = () => String(report.reference).replace(/[^\w\- ]+/g, "").trim() || "OC-Clean";
+const extOf = src => src.slice(5, src.indexOf(";")).split("/")[1].replace("jpeg", "jpg");
+const b64bytes = b64 => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+function saveBlob(blob, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+async function busy(btn, fn) {
+  const span = btn.querySelector("span"), old = span.textContent;
+  btn.disabled = true;
+  try { await fn(t => { span.textContent = t; }); span.textContent = old; }
+  catch (e) { span.textContent = "Try again"; setTimeout(() => { span.textContent = old; refreshSel(); }, 2500); }
+  btn.disabled = false;
+  refreshSel();
+}
+
+// ---------------- descargar fotos (1 = archivo, varias = ZIP) ----------------
+function downloadZip() {
+  return busy($("#zipBtn"), async label => {
+    label("Getting photos…");
+    const list = await ensureLoaded(chosen());
+    const name = i => "WO-" + safeRef() + "_photo-" + String(i + 1).padStart(2, "0") + "." + extOf(srcs[i]);
+    if (list.length === 1) {
+      const i = list[0];
+      return saveBlob(new Blob([b64bytes(srcs[i].split(",")[1])], { type: srcs[i].slice(5, srcs[i].indexOf(";")) }), name(i));
+    }
+    label("Preparing ZIP…");
+    await loadScript(JSZIP, "JSZip");
+    const zip = new JSZip();
+    list.forEach(i => zip.file(name(i), srcs[i].split(",")[1], { base64: true }));
+    const blob = await zip.generateAsync({ type: "blob" }, m => label("Preparing ZIP… " + Math.round(m.percent) + "%"));
+    saveBlob(blob, "WO-" + safeRef() + "_photos.zip");
+  });
+}
+
+// ---------------- PDF: portada + 1 foto por página, cada foto tal cual se subió ----------------
 const pdfText = s => String(s == null ? "" : s).replace(/[\r\n\t]+/g, " ").replace(/[^\x20-\x7E\xA0-\xFF]/g, "").trim();
 function wrap(text, font, size, max) {
   const out = []; let line = "";
@@ -165,47 +353,40 @@ function wrap(text, font, size, max) {
   if (line) out.push(line);
   return out;
 }
-const b64bytes = b64 => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 
-async function downloadPdf() {
-  const btn = $("#pdfBtn");
-  const label = t => { btn.textContent = t; };
-  btn.disabled = true;
-  try {
-    label("Loading photos…");
-    await loading;
-    const missing = photos.map((_, i) => i).filter(i => !srcs[i]);
-    if (missing.length) await loadAll(missing);
-
+function downloadPdf() {
+  return busy($("#pdfBtn"), async label => {
+    label("Getting photos…");
+    const list = await ensureLoaded(chosen());
     label("Preparing PDF…");
-    await loadScript(PDFLIB);
+    await loadScript(PDFLIB, "PDFLib");
     const L = window.PDFLib;
     const doc = await L.PDFDocument.create();
     const bold = await doc.embedFont(L.StandardFonts.HelveticaBold);
     const reg  = await doc.embedFont(L.StandardFonts.Helvetica);
-    const ink = L.rgb(0.10, 0.13, 0.17), gray = L.rgb(0.44, 0.50, 0.59), blue = L.rgb(0.19, 0.51, 0.81);
-    const n = photos.length, ref = report.reference;
+    const navy = L.rgb(0.08, 0.20, 0.31), gray = L.rgb(0.42, 0.45, 0.50), orange = L.rgb(0.85, 0.49, 0.19);
+    const total = photos.length, ref = report.reference;
     doc.setTitle("Service Report - " + pdfText(ref));
     doc.setAuthor("OC Clean Masters");
 
     const c = doc.addPage([612, 792]);
-    c.drawRectangle({ x: 0, y: 692, width: 612, height: 100, color: ink });
+    c.drawRectangle({ x: 0, y: 692, width: 612, height: 100, color: navy });
     c.drawText("OC CLEAN MASTERS", { x: 48, y: 742, size: 22, font: bold, color: L.rgb(1, 1, 1) });
-    c.drawText("SERVICE COMPLETION REPORT", { x: 48, y: 718, size: 11, font: reg, color: L.rgb(0.63, 0.68, 0.75) });
+    c.drawText("SERVICE COMPLETION REPORT", { x: 48, y: 718, size: 11, font: reg, color: L.rgb(0.75, 0.80, 0.86) });
     let y = 618;
     c.drawText(pdfText("WORKORDER: " + ref).toUpperCase(), { x: 66, y, size: 11, font: bold, color: gray });
     y -= 18;
     if (report.date) { c.drawText(pdfText(report.date), { x: 66, y, size: 11, font: reg, color: gray }); y -= 26; } else y -= 8;
-    wrap(report.description, bold, 16, 490).slice(0, 7).forEach(l => { c.drawText(l, { x: 66, y, size: 16, font: bold, color: ink }); y -= 21; });
-    c.drawRectangle({ x: 48, y: y + 10, width: 5, height: 632 - (y + 10), color: blue });
+    wrap(report.description, bold, 16, 490).slice(0, 7).forEach(l => { c.drawText(l, { x: 66, y, size: 16, font: bold, color: navy }); y -= 21; });
+    c.drawRectangle({ x: 48, y: y + 10, width: 5, height: 632 - (y + 10), color: orange });
     y -= 20;
-    c.drawText(n + " photo" + (n === 1 ? "" : "s"), { x: 48, y, size: 12, font: reg, color: ink });
-    if (report.videos) c.drawText("+ " + report.videos + " video(s) on file. Reply to our email to receive them.", { x: 48, y: y - 20, size: 10, font: reg, color: gray });
-    c.drawText("NorthMasters Commercial Cleaning Services  ·  Ontario, Canada", { x: 48, y: 40, size: 9, font: reg, color: gray });
+    c.drawText(list.length === total ? plural(total, "photo") : list.length + " of " + total + " photos", { x: 48, y, size: 12, font: reg, color: navy });
+    if (report.completed) c.drawText("Completed " + pdfText(report.completed), { x: 48, y: y - 18, size: 11, font: reg, color: gray });
+    c.drawText("OC Clean Masters  ·  705-690-7272  ·  oc.northmasters.ca", { x: 48, y: 40, size: 9, font: reg, color: gray });
 
-    for (let i = 0; i < n; i++) {
-      if (!srcs[i]) continue;
-      label("Preparing PDF… " + (i + 1) + "/" + n);
+    let k = 0;
+    for (const i of list) {
+      label("Preparing PDF… " + (++k) + "/" + list.length);
       const [head, b64] = srcs[i].split(",");
       const bytes = b64bytes(b64);
       let img;
@@ -214,37 +395,27 @@ async function downloadPdf() {
       const STRIP = 28;
       const pg = doc.addPage([img.width, img.height + STRIP]);
       pg.drawImage(img, { x: 0, y: STRIP, width: img.width, height: img.height });
-      pg.drawText(pdfText("Workorder " + ref + "  ·  Photo " + (i + 1) + " of " + n), { x: 10, y: 9, size: 10, font: reg, color: gray });
+      pg.drawText(pdfText("Workorder " + ref + "  ·  Photo " + (i + 1) + " of " + total), { x: 10, y: 9, size: 10, font: reg, color: gray });
     }
-
-    const blob = new Blob([await doc.save()], { type: "application/pdf" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "Service Report - " + (String(ref).replace(/[^\w\- ]+/g, "").trim() || "OC Clean") + ".pdf";
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-    label("Download PDF");
-  } catch (e) {
-    label("Couldn't create the PDF — tap to retry");
-  }
-  btn.disabled = false;
+    saveBlob(new Blob([await doc.save()], { type: "application/pdf" }),
+      "Service Report - " + safeRef() + (list.length < total ? " (" + list.length + " photos)" : "") + ".pdf");
+  });
 }
 
-// Visor grande
+// ---------------- visor grande ----------------
 let cur = 0;
 const lb = $("#lb");
 function openLB(i) { cur = i; showLB(); lb.classList.add("on"); }
 function showLB() {
-  let i = cur, tries = 0;
-  while (!srcs[i] && tries++ < photos.length) i = (i + 1) % photos.length;
-  cur = i;
   $("#lbI").src = srcs[cur] || "";
   $("#lbC").textContent = (cur + 1) + " / " + photos.length;
-  const a = $("#lbD"); a.href = srcs[cur] || "#"; a.download = "photo-" + (cur + 1) + ".jpg";
+  const a = $("#lbD");
+  a.href = srcs[cur] || "#";
+  a.download = srcs[cur] ? "WO-" + safeRef() + "_photo-" + String(cur + 1).padStart(2, "0") + "." + extOf(srcs[cur]) : "";
 }
 function step(d) {
   for (let k = 1; k <= photos.length; k++) {
-    const i = (cur + d * k + photos.length * k) % photos.length;
+    const i = ((cur + d * k) % photos.length + photos.length) % photos.length;
     if (srcs[i]) { cur = i; return showLB(); }
   }
 }
@@ -266,14 +437,16 @@ lb.addEventListener("touchend", e => {
   if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
 });
 
+// ---------------- arranque ----------------
 (async () => {
-  if (!T || !K) { app.innerHTML = '<div class="msg">This link is incomplete. Please use the button in our email.</div>'; return; }
+  const fail = t => { app.innerHTML = '<div class="msg">' + t + '</div>'; };
+  if (!T || !K) return fail("This link is incomplete. Please use the button in our email.");
   try {
     render(await getJSON({ api: "report", task_id: T, k: K }));
   } catch (e) {
-    app.innerHTML = '<div class="msg">' + (e.message === "invalid"
+    fail(e.message === "invalid"
       ? "This link is not valid. Please use the button in our email."
-      : "We couldn't load this report right now. Please try again in a minute, or reply to our email.") + '</div>';
+      : "We couldn't load this report right now. Please try again in a minute, or reply to our email.");
   }
 })();
 </script>
