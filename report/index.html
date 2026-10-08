@@ -165,13 +165,23 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
 
 // Pide JSON al script SIN cookies de Google (no importa cuántas cuentas tenga abiertas)
+const DEBUG = new URLSearchParams(location.search).get("debug") === "1";
+const T0 = performance.now(), times = [];
+function logTime(what, ms, tries) {
+  if (!DEBUG) return;
+  times.push(what + ": " + (ms / 1000).toFixed(1) + "s" + (tries > 1 ? " (" + tries + " tries)" : ""));
+  let box = document.getElementById("dbg");
+  if (!box) { box = document.createElement("pre"); box.id = "dbg"; box.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:30;background:#111;color:#0f0;font-size:12px;padding:8px;border-radius:6px;max-height:40vh;overflow:auto;margin:0"; document.body.appendChild(box); }
+  box.textContent = "Total: " + ((performance.now() - T0) / 1000).toFixed(1) + "s\n" + times.join("\n");
+}
 async function getJSON(params) {
   const url = API + "?" + new URLSearchParams(params).toString();
+  const t = performance.now();
   for (let i = 0; i < TRIES; i++) {
     try {
       const r = await fetch(url, { credentials: "omit", redirect: "follow", cache: "no-store" });
       const j = await r.json();
-      if (j.ok) return j;
+      if (j.ok) { logTime(params.api === "photo" ? "photo" : "report", performance.now() - t, i + 1); return j; }
       if (j.error === "invalid" || j.error === "not_found") throw Object.assign(new Error(j.error), { final: true });
     } catch (e) { if (e.final) throw e; }
     await sleep(800 * (i + 1) + Math.random() * 600);   // Google ocupado → esperar y reintentar
@@ -187,7 +197,7 @@ function setProgress() {
   const n = photos.length;
   $("#bar").classList.remove("ind");
   $("#bar i").style.width = (n ? Math.round(loadedCount / n * 100) : 100) + "%";
-  $("#loadT").textContent = "Loading photos… " + loadedCount + " of " + n;
+  $("#loadT").textContent = (qs.get("dl") === "pdf" ? "Preparing your PDF… photo " : "Loading photos… ") + loadedCount + " of " + n;
   if (loadedCount >= n) {
     $("#loadT").textContent = "All " + plural(n, "photo") + " loaded";
     $("#loadS").textContent = "";
@@ -478,6 +488,10 @@ lb.addEventListener("touchend", e => {
 
 // ---------------- arranque ----------------
 (async () => {
+  if (qs.get("dl") === "pdf") {
+    $("#loadT").textContent = "Preparing your PDF report…";
+    $("#loadS").textContent = "The download will start by itself when all photos are ready. Please keep this page open.";
+  }
   const fail = t => { app.innerHTML = '<div class="msg">' + t + '</div>'; };
   if (!T || !K) return fail("This link is incomplete. Please use the button in our email.");
   try {
