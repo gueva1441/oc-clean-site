@@ -22,7 +22,9 @@
 
   .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--navy);border-radius:10px;padding:16px 18px;margin:18px 0 14px}
   .meta{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.4px}
-  .desc{font-size:19px;font-weight:700;margin-top:6px;line-height:1.35;color:var(--navy);white-space:pre-wrap}
+  .wo{font-size:22px;font-weight:800;margin-top:4px;line-height:1.25;color:var(--navy);word-break:break-word}
+  .site{font-size:14px;font-weight:600;color:var(--muted);margin-top:4px;line-height:1.35}
+  .desc{font-size:16px;font-weight:600;margin-top:10px;line-height:1.4;color:var(--ink);white-space:pre-wrap}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .chip{font-size:13px;background:#eef2f7;color:var(--navy);padding:4px 10px;border-radius:999px;font-weight:600}
 
@@ -214,6 +216,12 @@ function setProgress() {
 }
 
 // ---------------- pintar ----------------
+// "Workorder" si el ticket tiene número de WO; si no (la referencia es el TSK-…), "Reference".
+function refLabel(d) {
+  const isWO = (d.isWO === true || d.isWO === false) ? d.isWO : !/^TSK-\d+$/.test(String(d.reference || ""));
+  return isWO ? "Workorder" : "Reference";
+}
+
 function render(d) {
   report = d; photos = d.photos; srcs = new Array(photos.length); mimes = new Array(photos.length);
   document.title = "Service Report " + d.reference + " · OC Clean Masters";
@@ -222,8 +230,11 @@ function render(d) {
     d.videos ? plural(d.videos, "video") + " on file" : ""
   ].filter(Boolean).map(c => '<span class="chip">' + c + '</span>').join("");
 
+  const site = String(d.site || "").trim();
   app.querySelector(".card").innerHTML =
-    '<div class="meta">Workorder ' + esc(d.reference) + (d.date ? " · " + esc(d.date) : "") + '</div>' +
+    '<div class="meta">Service report' + (d.date ? " · " + esc(d.date) : "") + '</div>' +
+    '<div class="wo">' + refLabel(d) + ' ' + esc(d.reference) + '</div>' +
+    (site ? '<div class="site">' + esc(site) + '</div>' : '') +
     '<div class="desc">' + esc(d.description) + '</div><div class="chips">' + chips + '</div>' +
     (d.videos ? '<div style="font-size:13px;color:var(--muted);margin-top:8px">Videos are not shown here — reply to our email to receive them.</div>' : '');
 
@@ -505,9 +516,10 @@ function downloadPdf() {
     doc.setAuthor("OC Clean Masters");
 
     // Sin portada: cada hoja lleva arriba los datos del trabajo y abajo el número de foto.
-    const title = pdfText(report.description);
+    const site  = pdfText(String(report.site || "").trim());
+    const title = [site, pdfText(report.description)].filter(Boolean).join("  ·  ");
     const head1 = "OC CLEAN MASTERS";
-    const head2 = "Workorder " + pdfText(ref);
+    const head2 = refLabel(report) + " " + pdfText(ref);
     let k = 0, first = null;
     for (const i of list) {
       label("Preparing PDF… " + (++k) + "/" + list.length);
